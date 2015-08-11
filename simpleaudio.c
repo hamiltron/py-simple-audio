@@ -16,25 +16,35 @@ play_buffer(PyObject *self, PyObject *args)
 {
     PyObject* audio_obj;
     Py_buffer audio_buffer;
-    int get_buf_result;
+    int result;
+    simpleaudioError_t play_error;
+    char error_str[SIMPLEAUDIO_ERRMSGLEN  * 4];
     unsigned int num_channels;
     unsigned int bytes_per_sample;
     unsigned int sample_rate;
     unsigned long long num_samples;
 
-    if (!PyArg_ParseTuple(args, "OIII", &audio_obj, &num_channels, &bytes_per_sample, &sample_rate))
+    if (!PyArg_ParseTuple(args, "OIII", &audio_obj, &num_channels, &bytes_per_sample, &sample_rate)) {
         return NULL;
+    }
     
-    get_buf_result = PyObject_GetBuffer(audio_obj, &audio_buffer, PyBUF_SIMPLE);
+    result = PyObject_GetBuffer(audio_obj, &audio_buffer, PyBUF_SIMPLE);
     
-    if (get_buf_result != -1) {
-      num_samples = audio_buffer.len / bytes_per_sample / num_channels;
-      printf("%d samples\n", (int)num_samples);
-      
-      PyBuffer_Release(&audio_buffer);
+    if (result != -1) {
+        num_samples = audio_buffer.len / bytes_per_sample / num_channels;
+        printf("%d samples\n", (int)num_samples);
+
+        play_error = playOS(audio_buffer.buf, num_samples, num_channels, bytes_per_sample * 8, sample_rate, &play_list_head);
+        if (play_error.errorState) {
+            snprintf(error_str, (SIMPLEAUDIO_ERRMSGLEN  * 4), "Error: %s\n  syserr: %s\n  code: %llX\n", play_error.apiMessage, play_error.sysMessage, play_error.code);
+            PyErr_SetString(PyExc_Exception, error_str);
+            return NULL;
+        }
+        
+        PyBuffer_Release(&audio_buffer);
     } 
     
-    return PyLong_FromLong(get_buf_result);
+    Py_RETURN_NONE; 
 }
 
 static PyMethodDef simpleaudio_methods[] = {
