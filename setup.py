@@ -10,8 +10,8 @@ else:
     pass
     # define a compiler macro for unsupported ?
     
-simpleaudio_module = Extension(
-    'simpleaudio', 
+_simpleaudio_module = Extension(
+    '_simpleaudio', 
     sources=['simpleaudio.c', platform_audio, platform_mutex],
     extra_link_args=['-framework', 'AudioToolbox'])
 
@@ -20,4 +20,5 @@ setup(name = 'simpleaudio',
     description = """The simpleaudio package contains the simpleaudio module 
                      which makes playing wave files in Python very simple.""",
     test_suite="tests",
-    ext_modules = [simpleaudio_module])
+    py_modules = ["simpleaudio.shiny"],
+    ext_modules = [_simpleaudio_module])

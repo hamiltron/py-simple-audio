@@ -47,7 +47,7 @@ play_buffer(PyObject *self, PyObject *args)
     Py_RETURN_NONE; 
 }
 
-static PyMethodDef simpleaudio_methods[] = {
+static PyMethodDef _simpleaudio_methods[] = {
     {"play_buffer",  play_buffer, METH_VARARGS,
      "Play audio from a buffer."},
     {NULL, NULL, 0, NULL}        /* Sentinel */
@@ -55,23 +55,23 @@ static PyMethodDef simpleaudio_methods[] = {
 
 static char doc_string [] = "simpleaudio is a module that makes playing audio in Python very simple.";
 
-static struct PyModuleDef simpleaudio_module = {
+static struct PyModuleDef _simpleaudio_module = {
    PyModuleDef_HEAD_INIT,
-   "simpleaudio",   /* name of module */
+   "_simpleaudio",   /* name of module */
    doc_string, /* module documentation, may be NULL */
    -1,       /* size of per-interpreter state of the module,
                 or -1 if the module keeps state in global variables. */
-   simpleaudio_methods
+   _simpleaudio_methods
 };
 
 static PyObject *AudioError;
 
 PyMODINIT_FUNC
-PyInit_simpleaudio(void)
+PyInit__simpleaudio(void)
 {
     PyObject *m;
 
-    m = PyModule_Create(&simpleaudio_module);
+    m = PyModule_Create(&_simpleaudio_module);
     if (m == NULL)
         return NULL;
 
