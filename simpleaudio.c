@@ -1,24 +1,16 @@
-#include <Python.h>
-#include <stdlib.h>
 #include "simpleaudio.h"
-
-#include <stdio.h>
 
 playItem_t play_list_head = {
     .playId = 0, 
-    .stopFlag = CLEAR,
+    .stopFlag = SA_CLEAR,
     .prevItem = NULL,
     .nextItem = NULL,
     .mutex = NULL};
 
-static PyObject *
-play_buffer(PyObject *self, PyObject *args)
+static PyObject* play_buffer(PyObject *self, PyObject *args)
 {
     PyObject* audio_obj;
     Py_buffer audio_buffer;
-    int result;
-    simpleaudioError_t play_error;
-    char error_str[SIMPLEAUDIO_ERRMSGLEN  * 4];
     unsigned int num_channels;
     unsigned int bytes_per_sample;
     unsigned int sample_rate;
@@ -28,23 +20,16 @@ play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
     
-    result = PyObject_GetBuffer(audio_obj, &audio_buffer, PyBUF_SIMPLE);
-    
-    if (result != -1) {
-        num_samples = audio_buffer.len / bytes_per_sample / num_channels;
-        printf("%d samples\n", (int)num_samples);
+    if (PyObject_GetBuffer(audio_obj, &audio_buffer, PyBUF_SIMPLE) == -1) {
+        /* could not get buffer -PyObject_GetBuffer 
+           should have set the appropriate error
+        */
+        return NULL;
+    }
 
-        play_error = playOS(audio_buffer.buf, num_samples, num_channels, bytes_per_sample * 8, sample_rate, &play_list_head);
-        if (play_error.errorState) {
-            snprintf(error_str, (SIMPLEAUDIO_ERRMSGLEN  * 4), "Error: %s\n  syserr: %s\n  code: %llX\n", play_error.apiMessage, play_error.sysMessage, play_error.code);
-            PyErr_SetString(PyExc_Exception, error_str);
-            return NULL;
-        }
-        
-        PyBuffer_Release(&audio_buffer);
-    } 
-    
-    Py_RETURN_NONE; 
+    num_samples = audio_buffer.len / bytes_per_sample / num_channels;
+    printf("%d samples\n", (int)num_samples);
+    return play_os(audio_buffer.buf, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head);
 }
 
 static PyMethodDef _simpleaudio_methods[] = {
@@ -53,14 +38,14 @@ static PyMethodDef _simpleaudio_methods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
-static char doc_string [] = "simpleaudio is a module that makes playing audio in Python very simple.";
+static char doc_string [] = "_simpleaudio is the module containing the C-extension that actually does all the work.";
 
 static struct PyModuleDef _simpleaudio_module = {
    PyModuleDef_HEAD_INIT,
    "_simpleaudio",   /* name of module */
-   doc_string, /* module documentation, may be NULL */
-   -1,       /* size of per-interpreter state of the module,
-                or -1 if the module keeps state in global variables. */
+   doc_string,       /* module documentation, may be NULL */
+   -1,               /* size of per-interpreter state of the module,
+                        or -1 if the module keeps state in global variables. */
    _simpleaudio_methods
 };
 
@@ -95,37 +80,38 @@ PyInit_spam(void)
 
 /*********************************************/
 
-int deleteListItem(playItem_t* playItem) {
-  int lastItemStatus = LAST_ITEM;
-  if (playItem->nextItem != NULL) {
-    playItem->nextItem->prevItem = playItem->prevItem;
-    lastItemStatus = NOT_LAST_ITEM;
-  } 
-  if (playItem->prevItem != NULL) {
-    playItem->prevItem->nextItem = playItem->nextItem;
-    lastItemStatus = NOT_LAST_ITEM;
-  }
-  free(playItem);
-  return lastItemStatus;
+void deleteListItem(playItem_t* playItem) {
+    if (playItem->nextItem != NULL) {
+        playItem->nextItem->prevItem = playItem->prevItem;
+    } 
+    if (playItem->prevItem != NULL) {
+        playItem->prevItem->nextItem = playItem->nextItem;
+    }
+    destroy_mutex(playItem->mutex);
+    PyMem_Free(playItem);
 }
+
+/*********************************************/
 
 playItem_t* newListItem(playItem_t* listHead) {
-  playItem_t* newItem;
-  playItem_t* oldTail;
-  
-  newItem = malloc(sizeof(playItem_t));
-  newItem->nextItem = NULL;
-  
-  oldTail = listHead;
-  while(oldTail->nextItem != NULL) {
-    oldTail = oldTail->nextItem;
-  }  
-  oldTail->nextItem = newItem;
-  newItem->prevItem = oldTail;
-  newItem->mutex = listHead->mutex;
-  
-  return newItem;
+    playItem_t* newItem;
+    playItem_t* oldTail;
+    
+    newItem = PyMem_Malloc(sizeof(playItem_t));
+    newItem->nextItem = NULL;
+    
+    oldTail = listHead;
+    while(oldTail->nextItem != NULL) {
+        oldTail = oldTail->nextItem;
+    }  
+    oldTail->nextItem = newItem;
+    
+    newItem->prevItem = oldTail;
+    newItem->mutex = create_mutex();
+    newItem->playId = (listHead->playId)++;
+    newItem->stopFlag = SA_CLEAR;
+    
+    return newItem;
 }
-
 
 /********************************************/

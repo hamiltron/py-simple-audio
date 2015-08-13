@@ -18,7 +18,7 @@ typedef struct {
 } alsaAudioBlob_t;
 
 alsaAudioBlob_t* createAudioBlob(void) {
-  alsaAudioBlob_t* audioBlob = malloc(sizeof(alsaAudioBlob_t));
+  alsaAudioBlob_t* audioBlob = PyMem_Malloc(sizeof(alsaAudioBlob_t));
   audioBlob->audioBuffer = NULL;
   audioBlob->handle = NULL; 
   return audioBlob;
@@ -28,14 +28,14 @@ void destroyAudioBlob(alsaAudioBlob_t* audioBlob) {
   void* mutex = audioBlob->playListItem->mutex;
   int lastItemStatus;
   
-  free(audioBlob->audioBuffer);
+  PyMem_Free(audioBlob->audioBuffer);
   grabMutex(mutex);
   lastItemStatus = deleteListItem(audioBlob->playListItem);
   releaseMutex(mutex);
   if (lastItemStatus == LAST_ITEM) {
     destroyMutex(mutex);
   }
-  free(audioBlob);
+  PyMem_Free(audioBlob);
 }
 
 void* playbackThread(void* threadParam) {
@@ -90,13 +90,13 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
     sampleFormat = SND_PCM_FORMAT_S16_LE;
   } else {
     error.errorState = SIMPLEAUDIO_ERROR;
-    strncpy(error.apiMessage, "Unsupported Sample Format.", SIMPLEAUDIO_ERRMSGLEN);
+    strncpy(error.apiMessage, "Unsupported Sample Format.", SA_ERR_STR_LEN);
     return error;
   }
   
   /* initial allocation and audio buffer copy */
   audioBlob = createAudioBlob();
-  audioBlob->audioBuffer = malloc(lenSamples * bytesPerFrame);
+  audioBlob->audioBuffer = PyMem_Malloc(lenSamples * bytesPerFrame);
   memcpy(audioBlob->audioBuffer, audioData, lenSamples * bytesPerFrame);
   audioBlob->samplesLeft = lenSamples;
   audioBlob->samplesPlayed = 0;
@@ -114,8 +114,8 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   if (result < 0) {	
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)result;
-    strncpy(error.sysMessage, snd_strerror(result), SIMPLEAUDIO_ERRMSGLEN);
-    strncpy(error.apiMessage, "Error opening PCM device.", SIMPLEAUDIO_ERRMSGLEN);
+    strncpy(error.sysMessage, snd_strerror(result), SA_ERR_STR_LEN);
+    strncpy(error.apiMessage, "Error opening PCM device.", SA_ERR_STR_LEN);
 
     destroyAudioBlob(audioBlob);
     return error;
@@ -126,8 +126,8 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   if (result < 0) {	
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)result;
-    strncpy(error.sysMessage, snd_strerror(result), SIMPLEAUDIO_ERRMSGLEN);
-    strncpy(error.apiMessage, "Error setting parameters.", SIMPLEAUDIO_ERRMSGLEN);
+    strncpy(error.sysMessage, snd_strerror(result), SA_ERR_STR_LEN);
+    strncpy(error.apiMessage, "Error setting parameters.", SA_ERR_STR_LEN);
     
     snd_pcm_close(audioBlob->handle);
     destroyAudioBlob(audioBlob);
@@ -139,7 +139,7 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   if (result != 0) {
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)result;
-    strncpy(error.apiMessage, "Could not create playback thread.", SIMPLEAUDIO_ERRMSGLEN);
+    strncpy(error.apiMessage, "Could not create playback thread.", SA_ERR_STR_LEN);
     
     snd_pcm_close(audioBlob->handle);
     destroyAudioBlob(audioBlob);

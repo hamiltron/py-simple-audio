@@ -1,56 +1,45 @@
 #ifndef SIMPLEAUDIO_H
 #define SIMPLEAUDIO_H
 
-#define SIMPLEAUDIO_ERRMSGLEN (256)
-#define SIMPLEAUDIO_OK (0)
-#define SIMPLEAUDIO_ERROR (1)
+#include <Python.h>
+#include <stdio.h>
+
+#define SA_ERR_STR_LEN (256)
 #define SIMPLEAUDIO_BUFSZ (1024)
 
-#define CLEAR (0)
-#define STOP (1)
+#define SA_CLEAR (0)
+#define SA_STOP (1)
 
 enum {
   NOT_LAST_ITEM = 0,
   LAST_ITEM = 1
 };
 
-typedef unsigned long long simpleaudioCode_t;
-
-/* structure used to collect and pass OS error information to interpreter */
-typedef struct {
-  int errorState;
-  simpleaudioCode_t code;
-  char sysMessage[SIMPLEAUDIO_ERRMSGLEN];
-  char apiMessage[SIMPLEAUDIO_ERRMSGLEN];
-} simpleaudioError_t;
+typedef unsigned long long play_id_t;
 
 /* linked list structure used to track the active playback items/threads */
 typedef struct playItem_s {
-  unsigned long long playId;
+  /* the play_id of the list head is used to store the next play_id value
+     used by a new play list item */
+  play_id_t playId;
   int stopFlag;
   struct playItem_s* prevItem;
   struct playItem_s* nextItem;
+  /* the mutex of the list head is used as a 'global' mutex for modifying
+     and accessing the list itself */
   void* mutex;
 } playItem_t;
 
 /* prototypes */
-simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels, 
-    int bitsPerChan, int sampleRate, playItem_t* playListHead);
+PyObject* play_os(void* audioData, int lenSamples, int numChannels, int bytesPerChan, int sampleRate, playItem_t* playListHead);
     
-int deleteListItem(playItem_t* playItem);
+void deleteListItem(playItem_t* playItem);
 playItem_t* newListItem(playItem_t* listHead);
+play_id_t new_play_id(playItem_t list_head);
 
 void* create_mutex();
 void destroy_mutex(void* mutex);
 void grab_mutex(void* mutex);
 void release_mutex(void* mutex);
-
-#ifdef SIMPLEAUDIO_NOT_SUP
-simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels, 
-    int bitsPerChan, int sampleRate, playItem_t* playListHead) {
- simpleaudioError_t error = {SIMPLEAUDIO_OK, 0, "", ""};
- return error;
-}
-#endif
 
 #endif /* SIMPLEAUDIO_H */

@@ -19,7 +19,7 @@ typedef struct {
 } winAudioBlob_t;
 
 winAudioBlob_t* createAudioBlob(void) {
-  winAudioBlob_t* audioBlob = malloc(sizeof(winAudioBlob_t));
+  winAudioBlob_t* audioBlob = PyMem_Malloc(sizeof(winAudioBlob_t));
   audioBlob->audioBuffer = NULL;
   return audioBlob;
 }
@@ -28,14 +28,14 @@ void destroyAudioBlob(winAudioBlob_t* audioBlob) {
   void* mutex = audioBlob->playListItem->mutex;
   int lastItemStatus;
   
-  free(audioBlob->audioBuffer);
+  PyMem_Free(audioBlob->audioBuffer);
   grabMutex(mutex);
   lastItemStatus = deleteListItem(audioBlob->playListItem);
   releaseMutex(mutex);
   if (lastItemStatus == LAST_ITEM) {
     destroyMutex(mutex);
   }
-  free(audioBlob);
+  PyMem_Free(audioBlob);
 }
 
 MMRESULT fillBuffer(WAVEHDR* waveHeader, winAudioBlob_t* audioBlob) {
@@ -63,8 +63,8 @@ MMRESULT fillBuffer(WAVEHDR* waveHeader, winAudioBlob_t* audioBlob) {
   /* ... no more audio left to buffer */
   } else {
     if (audioBlob->numBuffers > 0) { 
-      free(waveHeader->lpData);
-      free(waveHeader);
+      PyMem_Free(waveHeader->lpData);
+      PyMem_Free(waveHeader);
       audioBlob->numBuffers--; 
     } else {
       /* all done, cleanup */
@@ -113,7 +113,7 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   
   /* initial allocation and audio buffer copy */
   audioBlob = createAudioBlob();
-  audioBlob->audioBuffer = malloc(lenSamples * bytesPerFrame);
+  audioBlob->audioBuffer = PyMem_Malloc(lenSamples * bytesPerFrame);
   memcpy(audioBlob->audioBuffer, audioData, lenSamples * bytesPerFrame);
   audioBlob->lenBytes = lenSamples * bytesPerFrame;
   audioBlob->usedBytes = 0;
@@ -145,10 +145,10 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
     DWORD lastError = GetLastError();
     /* lang code : US En */
     FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), 
-        NULL, lastError, 0x0409, error.sysMessage, SIMPLEAUDIO_ERRMSGLEN, NULL);
+        NULL, lastError, 0x0409, error.sysMessage, SA_ERR_STR_LEN, NULL);
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)lastError;
-    strncpy(error.apiMessage, "Failed to open audio device.", SIMPLEAUDIO_ERRMSGLEN);
+    strncpy(error.apiMessage, "Failed to open audio device.", SA_ERR_STR_LEN);
     
     destroyAudioBlob(audioBlob);
     return error;
@@ -159,8 +159,8 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   if (result != MMSYSERR_NOERROR) {
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)result;
-    waveOutGetErrorText(result, error.sysMessage, SIMPLEAUDIO_ERRMSGLEN);
-    strncpy(error.apiMessage, "Failed to open audio device.", SIMPLEAUDIO_ERRMSGLEN);
+    waveOutGetErrorText(result, error.sysMessage, SA_ERR_STR_LEN);
+    strncpy(error.apiMessage, "Failed to open audio device.", SA_ERR_STR_LEN);
 
     PostThreadMessage(threadId, WM_QUIT, 0, 0);
     destroyAudioBlob(audioBlob);
@@ -169,17 +169,17 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   
   /* fill and write two buffers */
   for (i = 0; i < 2; i++) {
-    tempWaveHeader = malloc(sizeof(WAVEHDR));
+    tempWaveHeader = PyMem_Malloc(sizeof(WAVEHDR));
     memset(tempWaveHeader, 0, sizeof(WAVEHDR));
-    tempWaveHeader->lpData = malloc(SIMPLEAUDIO_BUFSZ);
+    tempWaveHeader->lpData = PyMem_Malloc(SIMPLEAUDIO_BUFSZ);
     tempWaveHeader->dwBufferLength = SIMPLEAUDIO_BUFSZ;
     
     result = fillBuffer(tempWaveHeader, audioBlob);
     if (result != MMSYSERR_NOERROR) {
       error.errorState = SIMPLEAUDIO_ERROR;
       error.code = (simpleaudioCode_t)result;
-      waveOutGetErrorText(result, error.sysMessage, SIMPLEAUDIO_ERRMSGLEN);
-      strncpy(error.apiMessage, "Failed to buffer audio.", SIMPLEAUDIO_ERRMSGLEN);
+      waveOutGetErrorText(result, error.sysMessage, SA_ERR_STR_LEN);
+      strncpy(error.apiMessage, "Failed to buffer audio.", SA_ERR_STR_LEN);
       
       PostThreadMessage(threadId, WM_QUIT, 0, 0);
       waveOutUnprepareHeader(audioBlob->waveOutHdr, tempWaveHeader, sizeof(WAVEHDR));
