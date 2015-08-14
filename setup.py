@@ -13,7 +13,8 @@ else:
 _simpleaudio_module = Extension(
     '_simpleaudio', 
     sources=['simpleaudio.c', platform_audio, platform_mutex],
-    extra_link_args=['-framework', 'AudioToolbox'])
+    extra_link_args=['-framework', 'AudioToolbox'],
+    define_macros = [('DEBUG', '2')])
 
 setup(name = 'simpleaudio',
     version = '1.0',

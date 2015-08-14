@@ -4,6 +4,8 @@
 /* this should be replaced by whatever constant Apple has designated */
 #define SUCCESS (0)
 
+#define NUM_Q_BUFS (2)
+
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, code); \
     PyErr_SetString(PyExc_Exception, str_ptr);
@@ -19,10 +21,19 @@ typedef struct {
 
 macAudioBlob_t* createAudioBlob(void) {
     macAudioBlob_t* audioBlob = PyMem_Malloc(sizeof(macAudioBlob_t));
+    
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audioBlob);
+    #endif
+    
     return audioBlob;
 }
 
 void destroyAudioBlob(macAudioBlob_t* audioBlob) {
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audioBlob);
+    #endif
+    
     PyMem_Free(audioBlob->audioBuffer);
     grab_mutex(audioBlob->list_mutex);
     deleteListItem(audioBlob->playListItem);
@@ -30,7 +41,13 @@ void destroyAudioBlob(macAudioBlob_t* audioBlob) {
     PyMem_Free(audioBlob);
 }
 
+/* NOTE: like the official example code, 
+   OSX API calls are not checked for errors here */
 static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffer *queueBuffer) {
+    #if DEBUG == 2
+    fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
+    #endif
+    
     macAudioBlob_t* audioBlob = (macAudioBlob_t*)param;
     int want = queueBuffer->mAudioDataBytesCapacity;
     int have = audioBlob->lenBytes-audioBlob->usedBytes; 
@@ -40,8 +57,16 @@ static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffe
     stopFlag = audioBlob->playListItem->stopFlag;
     release_mutex(audioBlob->playListItem->mutex);
     
+    #if DEBUG == 2
+    fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stopFlag);
+    #endif
+    
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stopFlag) {
+        #if DEBUG == 2
+        fprintf(DBG_OUT, DBG_PRE"still feeding queue\n");
+        #endif
+        
         if (have > want) {have = want;}
         memcpy(queueBuffer->mAudioData, &audioBlob->audioBuffer[audioBlob->usedBytes], have);
         queueBuffer->mAudioDataByteSize = have;
@@ -49,6 +74,10 @@ static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffe
         AudioQueueEnqueueBuffer(audioQueue, queueBuffer, 0, NULL);
     /* ... no more audio left to buffer */
     } else {
+        #if DEBUG == 2
+        fprintf(DBG_OUT, DBG_PRE"done enqueue'ing - dellocating a buffer\n");
+        #endif
+
         if (audioBlob->buffers > 0) { 
             AudioQueueFreeBuffer(audioQueue, queueBuffer); 
             audioBlob->buffers--; 
@@ -62,7 +91,11 @@ static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffe
     }
 }
 
-PyObject* play_os(void* audioData, int lenSamples, int numChannels, int bytesPerChan, int sampleRate, playItem_t* playListHead) {
+PyObject* play_os(void* audioData, len_samples_t lenSamples, int numChannels, int bytesPerChan, int sampleRate, playItem_t* playListHead) {
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audioData, lenSamples, numChannels, bytesPerChan, sampleRate, playListHead);
+    #endif
+    
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audioQueue;
     AudioStreamBasicDescription audioFmt;
@@ -113,7 +146,10 @@ PyObject* play_os(void* audioData, int lenSamples, int numChannels, int bytesPer
         return NULL;
     }
     
-    for(i = 0; i < 2; i++) {
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_Q_BUFS, SIMPLEAUDIO_BUFSZ);
+    #endif
+    for(i = 0; i < NUM_Q_BUFS; i++) {
         result = AudioQueueAllocateBuffer(audioQueue, SIMPLEAUDIO_BUFSZ, &queueBuffer);
         if (result != SUCCESS) {
             MAC_EXCEPTION("Unable to allocate buffer.", result, err_msg_buf);

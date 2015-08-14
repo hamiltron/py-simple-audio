@@ -14,7 +14,11 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     unsigned int num_channels;
     unsigned int bytes_per_sample;
     unsigned int sample_rate;
-    unsigned long long num_samples;
+    len_samples_t num_samples;
+
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
+    #endif
 
     if (!PyArg_ParseTuple(args, "OIII", &audio_obj, &num_channels, &bytes_per_sample, &sample_rate)) {
         return NULL;
@@ -28,7 +32,6 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     }
 
     num_samples = audio_buffer.len / bytes_per_sample / num_channels;
-    printf("%d samples\n", (int)num_samples);
     return play_os(audio_buffer.buf, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head);
 }
 
@@ -67,6 +70,10 @@ PyInit__simpleaudio(void)
     /* initialize the list head mutex */
     play_list_head.mutex = create_mutex();
     
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"init'd list head at %p\n", &play_list_head);
+    #endif
+    
     return m;
 }
 
@@ -81,6 +88,10 @@ PyInit_spam(void)
 /*********************************************/
 
 void deleteListItem(playItem_t* playItem) {
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", playItem, playItem->playId, playItem->prevItem, playItem->nextItem);
+    #endif
+    
     if (playItem->nextItem != NULL) {
         playItem->nextItem->prevItem = playItem->prevItem;
     } 
@@ -110,6 +121,10 @@ playItem_t* newListItem(playItem_t* listHead) {
     newItem->mutex = create_mutex();
     newItem->playId = (listHead->playId)++;
     newItem->stopFlag = SA_CLEAR;
+    
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", newItem, newItem->playId, oldTail);
+    #endif
     
     return newItem;
 }
