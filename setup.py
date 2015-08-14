@@ -9,7 +9,7 @@ if sys.platform == 'darwin':
 else:
     pass
     # define a compiler macro for unsupported ?
-    
+
 _simpleaudio_module = Extension(
     '_simpleaudio', 
     sources=['simpleaudio.c', platform_audio, platform_mutex],

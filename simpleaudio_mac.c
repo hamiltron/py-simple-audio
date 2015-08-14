@@ -9,84 +9,74 @@
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, code); \
     PyErr_SetString(PyExc_Exception, str_ptr);
-    
+
 typedef struct {
-    void* audioBuffer;
-    int usedBytes;
-    int lenBytes; 
+    void* audio_buffer;
+    int used_bytes;
+    int len_bytes;
     int buffers;
-    play_item_t* playListItem;
+    play_item_t* play_list_item;
     void* list_mutex;
-} macAudioBlob_t;
+} mac_audio_blob_t;
 
-macAudioBlob_t* createAudioBlob(void) {
-    macAudioBlob_t* audioBlob = PyMem_Malloc(sizeof(macAudioBlob_t));
-    
+void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
     #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audioBlob);
+    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
     #endif
-    
-    return audioBlob;
+
+    PyMem_Free(audio_blob->audio_buffer);
+    grab_mutex(audio_blob->list_mutex);
+    delete_list_item(audio_blob->play_list_item);
+    release_mutex(audio_blob->list_mutex);
+    PyMem_Free(audio_blob);
 }
 
-void destroyAudioBlob(macAudioBlob_t* audioBlob) {
-    #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audioBlob);
-    #endif
-    
-    PyMem_Free(audioBlob->audioBuffer);
-    grab_mutex(audioBlob->list_mutex);
-    delete_list_item(audioBlob->playListItem);
-    release_mutex(audioBlob->list_mutex);
-    PyMem_Free(audioBlob);
-}
-
-/* NOTE: like the official example code, 
+/* NOTE: like the official example code,
    OSX API calls are not checked for errors here */
-static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffer *queueBuffer) {
+static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuffer *queue_buffer) {
     #if DEBUG == 2
     fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
     #endif
-    
-    macAudioBlob_t* audioBlob = (macAudioBlob_t*)param;
-    int want = queueBuffer->mAudioDataBytesCapacity;
-    int have = audioBlob->lenBytes-audioBlob->usedBytes; 
+
+    mac_audio_blob_t* audio_blob = (mac_audio_blob_t*)param;
+    int want = queue_buffer->mAudioDataBytesCapacity;
+    int have = audio_blob->len_bytes-audio_blob->used_bytes;
     int stop_flag;
-  
-    grab_mutex(audioBlob->playListItem->mutex);
-    stop_flag = audioBlob->playListItem->stop_flag;
-    release_mutex(audioBlob->playListItem->mutex);
-    
+
+    grab_mutex(audio_blob->play_list_item->mutex);
+    stop_flag = audio_blob->play_list_item->stop_flag;
+    release_mutex(audio_blob->play_list_item->mutex);
+
     #if DEBUG == 2
     fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stop_flag);
     #endif
-    
+
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stop_flag) {
         #if DEBUG == 2
         fprintf(DBG_OUT, DBG_PRE"still feeding queue\n");
         #endif
-        
+
         if (have > want) {have = want;}
-        memcpy(queueBuffer->mAudioData, &audioBlob->audioBuffer[audioBlob->usedBytes], have);
-        queueBuffer->mAudioDataByteSize = have;
-        audioBlob->usedBytes += have;
-        AudioQueueEnqueueBuffer(audioQueue, queueBuffer, 0, NULL);
+        memcpy(queue_buffer->mAudioData, &audio_blob->audio_buffer[audio_blob->used_bytes], have);
+        queue_buffer->mAudioDataByteSize = have;
+        audio_blob->used_bytes += have;
+        AudioQueueEnqueueBuffer(audio_queue, queue_buffer, 0, NULL);
     /* ... no more audio left to buffer */
     } else {
         #if DEBUG == 2
         fprintf(DBG_OUT, DBG_PRE"done enqueue'ing - dellocating a buffer\n");
         #endif
 
-        if (audioBlob->buffers > 0) { 
-            AudioQueueFreeBuffer(audioQueue, queueBuffer); 
-            audioBlob->buffers--; 
+        if (audio_blob->buffers > 0) {
+            AudioQueueFreeBuffer(audio_queue, queue_buffer);
+            audio_blob->buffers--;
         }
-        if (audioBlob->buffers == 0) {
+        if (audio_blob->buffers == 0) {
             /* all done, cleanup */
-            AudioQueueStop(audioQueue, true);
-            AudioQueueDispose(audioQueue, true);
-            destroyAudioBlob(audioBlob);
+            AudioQueueStop(audio_queue, true);
+            AudioQueueDispose(audio_queue, true);
+            destroy_audio_blob(audio_blob);
         }
     }
 }
@@ -95,81 +85,86 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
     #ifdef DEBUG
     fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audio_data, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
     #endif
-    
+
     char err_msg_buf[SA_ERR_STR_LEN];
-    AudioQueueRef audioQueue;
-    AudioStreamBasicDescription audioFmt;
-    AudioQueueBuffer* queueBuffer;
+    AudioQueueRef audio_queue;
+    AudioStreamBasicDescription audio_fmt;
+    AudioQueueBuffer* queue_buffer;
     /* signed 32-bit int - I think */
     OSStatus result;
-    macAudioBlob_t* audioBlob;
+    mac_audio_blob_t* audio_blob;
     size_t bytesPerFrame = bytes_per_chan * num_channels;
     int i;
-    
-    /* initial allocation and audio buffer copy */
-    audioBlob = createAudioBlob();
-    audioBlob->list_mutex = play_list_head->mutex;
-    audioBlob->audioBuffer = PyMem_Malloc(len_samples * bytesPerFrame);
-    audioBlob->lenBytes = len_samples * bytesPerFrame;
-    memcpy(audioBlob->audioBuffer, audio_data, len_samples * bytesPerFrame);
-    audioBlob->usedBytes = 0;
-    audioBlob->buffers = 0;
-    memset(&audioFmt, 0, sizeof(audioFmt));
-    
+
+    /* audio blob creation and audio buffer copy */
+    audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));
+
+    #ifdef DEBUG
+    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
+    #endif
+
+    audio_blob->list_mutex = play_list_head->mutex;
+    audio_blob->audio_buffer = PyMem_Malloc(len_samples * bytesPerFrame);
+    audio_blob->len_bytes = len_samples * bytesPerFrame;
+    memcpy(audio_blob->audio_buffer, audio_data, len_samples * bytesPerFrame);
+    audio_blob->used_bytes = 0;
+    audio_blob->buffers = 0;
+    memset(&audio_fmt, 0, sizeof(audio_fmt));
+
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
-    audioBlob->playListItem = new_list_item(play_list_head);
+    audio_blob->play_list_item = new_list_item(play_list_head);
     release_mutex(play_list_head->mutex);
-    
+
     /* mac format header setup */
-    audioFmt.mSampleRate = sample_rate;
-    audioFmt.mFormatID = kAudioFormatLinearPCM;
-    audioFmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
-    audioFmt.mFramesPerPacket = 1;
-    audioFmt.mChannelsPerFrame = num_channels;
-    audioFmt.mBytesPerFrame = bytesPerFrame;
-    audioFmt.mBytesPerPacket = audioFmt.mBytesPerFrame * audioFmt.mFramesPerPacket;
-    audioFmt.mBitsPerChannel = bytes_per_chan * 8;
-    
-    result = AudioQueueNewOutput(&audioFmt, audioCallback, audioBlob, NULL, NULL, 0, &audioQueue);
+    audio_fmt.mSampleRate = sample_rate;
+    audio_fmt.mFormatID = kAudioFormatLinearPCM;
+    audio_fmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    audio_fmt.mFramesPerPacket = 1;
+    audio_fmt.mChannelsPerFrame = num_channels;
+    audio_fmt.mBytesPerFrame = bytesPerFrame;
+    audio_fmt.mBytesPerPacket = audio_fmt.mBytesPerFrame * audio_fmt.mFramesPerPacket;
+    audio_fmt.mBitsPerChannel = bytes_per_chan * 8;
+
+    result = AudioQueueNewOutput(&audio_fmt, audio_callback, audio_blob, NULL, NULL, 0, &audio_queue);
     if(result != SUCCESS) {
         MAC_EXCEPTION("Unsupported audio format?", result, err_msg_buf);
-        destroyAudioBlob(audioBlob);
+        destroy_audio_blob(audio_blob);
         return NULL;
     }
-    
-    result = AudioQueueSetParameter(audioQueue, kAudioQueueParam_Volume, 1.0);
+
+    result = AudioQueueSetParameter(audio_queue, kAudioQueueParam_Volume, 1.0);
     if(result != SUCCESS) {
         MAC_EXCEPTION("Unable to set volume.", result, err_msg_buf);
-        AudioQueueDispose(audioQueue,true);
-        destroyAudioBlob(audioBlob);
+        AudioQueueDispose(audio_queue,true);
+        destroy_audio_blob(audio_blob);
         return NULL;
     }
-    
+
     #ifdef DEBUG
     fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_Q_BUFS, SIMPLEAUDIO_BUFSZ);
     #endif
     for(i = 0; i < NUM_Q_BUFS; i++) {
-        result = AudioQueueAllocateBuffer(audioQueue, SIMPLEAUDIO_BUFSZ, &queueBuffer);
+        result = AudioQueueAllocateBuffer(audio_queue, SIMPLEAUDIO_BUFSZ, &queue_buffer);
         if (result != SUCCESS) {
             MAC_EXCEPTION("Unable to allocate buffer.", result, err_msg_buf);
-            AudioQueueDispose(audioQueue,true);
-            destroyAudioBlob(audioBlob);
+            AudioQueueDispose(audio_queue,true);
+            destroy_audio_blob(audio_blob);
             return NULL;
         }
-        audioBlob->buffers++;
+        audio_blob->buffers++;
         /* fill a buffer using the callback */
-        audioCallback(audioBlob, audioQueue, queueBuffer); 
+        audio_callback(audio_blob, audio_queue, queue_buffer);
     }
-    
-    result = AudioQueueStart(audioQueue, NULL);
+
+    result = AudioQueueStart(audio_queue, NULL);
     if(result != SUCCESS) {
         MAC_EXCEPTION("Unable to start queue.", result, err_msg_buf);
-        AudioQueueDispose(audioQueue,true);
-        destroyAudioBlob(audioBlob);
+        AudioQueueDispose(audio_queue,true);
+        destroy_audio_blob(audio_blob);
         return NULL;
     }
-  
-    return PyLong_FromUnsignedLongLong(audioBlob->playListItem->play_id);
+
+    return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
 }
 

@@ -36,7 +36,7 @@ typedef struct play_item_s {
 
 /* prototypes */
 PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head);
-    
+
 void delete_list_item(play_item_t* play_item);
 play_item_t* new_list_item(play_item_t* list_head);
 

@@ -20,3 +20,4 @@
 * keep reference to list mutex in audio blobs
 * linked list head is never deallocated - delete_list_item returns void
 * change len_samples type
+* remove create_audio_blob 
