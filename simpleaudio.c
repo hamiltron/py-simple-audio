@@ -1,10 +1,10 @@
 #include "simpleaudio.h"
 
-playItem_t play_list_head = {
-    .playId = 0, 
-    .stopFlag = SA_CLEAR,
-    .prevItem = NULL,
-    .nextItem = NULL,
+play_item_t play_list_head = {
+    .play_id = 0, 
+    .stop_flag = SA_CLEAR,
+    .prev_item = NULL,
+    .next_item = NULL,
     .mutex = NULL};
 
 static PyObject* play_buffer(PyObject *self, PyObject *args)
@@ -87,43 +87,43 @@ PyInit_spam(void)
 
 /*********************************************/
 
-void deleteListItem(playItem_t* playItem) {
+void delete_list_item(play_item_t* play_item) {
     #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", playItem, playItem->playId, playItem->prevItem, playItem->nextItem);
+    fprintf(DBG_OUT, DBG_PRE"deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", play_item, play_item->play_id, play_item->prev_item, play_item->next_item);
     #endif
     
-    if (playItem->nextItem != NULL) {
-        playItem->nextItem->prevItem = playItem->prevItem;
+    if (play_item->next_item != NULL) {
+        play_item->next_item->prev_item = play_item->prev_item;
     } 
-    if (playItem->prevItem != NULL) {
-        playItem->prevItem->nextItem = playItem->nextItem;
+    if (play_item->prev_item != NULL) {
+        play_item->prev_item->next_item = play_item->next_item;
     }
-    destroy_mutex(playItem->mutex);
-    PyMem_Free(playItem);
+    destroy_mutex(play_item->mutex);
+    PyMem_Free(play_item);
 }
 
 /*********************************************/
 
-playItem_t* newListItem(playItem_t* listHead) {
-    playItem_t* newItem;
-    playItem_t* oldTail;
+play_item_t* new_list_item(play_item_t* list_head) {
+    play_item_t* newItem;
+    play_item_t* oldTail;
     
-    newItem = PyMem_Malloc(sizeof(playItem_t));
-    newItem->nextItem = NULL;
+    newItem = PyMem_Malloc(sizeof(play_item_t));
+    newItem->next_item = NULL;
     
-    oldTail = listHead;
-    while(oldTail->nextItem != NULL) {
-        oldTail = oldTail->nextItem;
+    oldTail = list_head;
+    while(oldTail->next_item != NULL) {
+        oldTail = oldTail->next_item;
     }  
-    oldTail->nextItem = newItem;
+    oldTail->next_item = newItem;
     
-    newItem->prevItem = oldTail;
+    newItem->prev_item = oldTail;
     newItem->mutex = create_mutex();
-    newItem->playId = (listHead->playId)++;
-    newItem->stopFlag = SA_CLEAR;
+    newItem->play_id = (list_head->play_id)++;
+    newItem->stop_flag = SA_CLEAR;
     
     #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", newItem, newItem->playId, oldTail);
+    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", newItem, newItem->play_id, oldTail);
     #endif
     
     return newItem;

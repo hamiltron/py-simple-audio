@@ -15,7 +15,7 @@ typedef struct {
   int usedBytes;
   int lenBytes; 
   int numBuffers;
-  playItem_t* playListItem;
+  play_item_t* playListItem;
 } winAudioBlob_t;
 
 winAudioBlob_t* createAudioBlob(void) {
@@ -30,7 +30,7 @@ void destroyAudioBlob(winAudioBlob_t* audioBlob) {
   
   PyMem_Free(audioBlob->audioBuffer);
   grabMutex(mutex);
-  lastItemStatus = deleteListItem(audioBlob->playListItem);
+  lastItemStatus = delete_list_item(audioBlob->playListItem);
   releaseMutex(mutex);
   if (lastItemStatus == LAST_ITEM) {
     destroyMutex(mutex);
@@ -41,15 +41,15 @@ void destroyAudioBlob(winAudioBlob_t* audioBlob) {
 MMRESULT fillBuffer(WAVEHDR* waveHeader, winAudioBlob_t* audioBlob) {
   int want = waveHeader->dwBufferLength;
   int have = audioBlob->lenBytes - audioBlob->usedBytes; 
-  int stopFlag = 0;
+  int stop_flag = 0;
   MMRESULT result;
   
   grabMutex(audioBlob->playListItem->mutex);
-  stopFlag = audioBlob->playListItem->stopFlag;
+  stop_flag = audioBlob->playListItem->stop_flag;
   releaseMutex(audioBlob->playListItem->mutex);
   
   /* if there's still audio yet to buffer ... */
-  if (have > 0 && !stopFlag) {
+  if (have > 0 && !stop_flag) {
     if (have > want) {have = want;}
     result = waveOutUnprepareHeader(audioBlob->waveOutHdr, waveHeader, sizeof(WAVEHDR));
     if (result != MMSYSERR_NOERROR) {return result;}
@@ -98,39 +98,39 @@ DWORD WINAPI bufferThread(LPVOID threadParam) {
   return 0;
 }
 
-simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels, 
-  int bitsPerChan, int sampleRate, playItem_t* playListHead) {
+simpleaudioError_t playOS(void* audio_data, int len_samples, int num_channels, 
+  int bitsPerChan, int sample_rate, play_item_t* play_list_head) {
   winAudioBlob_t* audioBlob;
   WAVEFORMATEX audioFmt; 
   MMRESULT result;
   simpleaudioError_t error = {SIMPLEAUDIO_OK, 0, "", ""};
   HANDLE threadHandle = NULL;
   DWORD threadId;
-  int bytesPerChan = bitsPerChan / 8;
-  int bytesPerFrame = bytesPerChan * numChannels;
+  int bytes_per_chan = bitsPerChan / 8;
+  int bytesPerFrame = bytes_per_chan * num_channels;
   WAVEHDR* tempWaveHeader;
   int i;
   
   /* initial allocation and audio buffer copy */
   audioBlob = createAudioBlob();
-  audioBlob->audioBuffer = PyMem_Malloc(lenSamples * bytesPerFrame);
-  memcpy(audioBlob->audioBuffer, audioData, lenSamples * bytesPerFrame);
-  audioBlob->lenBytes = lenSamples * bytesPerFrame;
+  audioBlob->audioBuffer = PyMem_Malloc(len_samples * bytesPerFrame);
+  memcpy(audioBlob->audioBuffer, audio_data, len_samples * bytesPerFrame);
+  audioBlob->lenBytes = len_samples * bytesPerFrame;
   audioBlob->usedBytes = 0;
   audioBlob->numBuffers = 0;
   
   /* setup the linked list item for this playback buffer */
-  grabMutex(playListHead->mutex);
-  audioBlob->playListItem = newListItem(playListHead);
-  audioBlob->playListItem->playId = 0;
-  audioBlob->playListItem->stopFlag = 0;
-  releaseMutex(playListHead->mutex);
+  grabMutex(play_list_head->mutex);
+  audioBlob->playListItem = new_list_item(play_list_head);
+  audioBlob->playListItem->play_id = 0;
+  audioBlob->playListItem->stop_flag = 0;
+  releaseMutex(play_list_head->mutex);
   
   /* windows audio device and format headers setup */
   audioFmt.wFormatTag = WAVE_FORMAT_PCM;
-  audioFmt.nChannels = numChannels;
+  audioFmt.nChannels = num_channels;
   
-  audioFmt.nSamplesPerSec = sampleRate; 
+  audioFmt.nSamplesPerSec = sample_rate; 
   audioFmt.nBlockAlign = bytesPerFrame; 
   /* per MSDN WAVEFORMATEX documentation */
   audioFmt.nAvgBytesPerSec = audioFmt.nSamplesPerSec * audioFmt.nBlockAlign;

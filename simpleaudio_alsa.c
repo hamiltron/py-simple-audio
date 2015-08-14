@@ -14,7 +14,7 @@ typedef struct {
   int samplesLeft; 
   int samplesPlayed;
   int frameSize;
-  playItem_t* playListItem;
+  play_item_t* playListItem;
 } alsaAudioBlob_t;
 
 alsaAudioBlob_t* createAudioBlob(void) {
@@ -30,7 +30,7 @@ void destroyAudioBlob(alsaAudioBlob_t* audioBlob) {
   
   PyMem_Free(audioBlob->audioBuffer);
   grabMutex(mutex);
-  lastItemStatus = deleteListItem(audioBlob->playListItem);
+  lastItemStatus = delete_list_item(audioBlob->playListItem);
   releaseMutex(mutex);
   if (lastItemStatus == LAST_ITEM) {
     destroyMutex(mutex);
@@ -43,11 +43,11 @@ void* playbackThread(void* threadParam) {
   void* audioPtr;
   int playSamples;
   int result;
-  int stopFlag = 0;
+  int stop_flag = 0;
 
-  while (audioBlob->samplesLeft > 0 && !stopFlag) {
+  while (audioBlob->samplesLeft > 0 && !stop_flag) {
     grabMutex(audioBlob->playListItem->mutex);
-    stopFlag = audioBlob->playListItem->stopFlag;
+    stop_flag = audioBlob->playListItem->stop_flag;
     releaseMutex(audioBlob->playListItem->mutex);
    
     if (audioBlob->samplesLeft < SIMPLEAUDIO_BUFSZ / audioBlob->frameSize) {
@@ -74,19 +74,19 @@ void* playbackThread(void* threadParam) {
   pthread_exit(0);
 }
 
-simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels, 
-    int bitsPerChan, int sampleRate, playItem_t* playListHead) {
+simpleaudioError_t playOS(void* audio_data, int len_samples, int num_channels, 
+    int bitsPerChan, int sample_rate, play_item_t* play_list_head) {
   alsaAudioBlob_t* audioBlob;
   simpleaudioError_t error = {SIMPLEAUDIO_OK, 0, "", ""};
-  int bytesPerChan = bitsPerChan / 8;
-  int bytesPerFrame = bytesPerChan * numChannels; 
+  int bytes_per_chan = bitsPerChan / 8;
+  int bytesPerFrame = bytes_per_chan * num_channels; 
   static char *device = "default";
   snd_pcm_format_t sampleFormat;
   pthread_t playThread;
   int result;
   
   /* set that format appropriately */
-  if (bytesPerChan == 2) {
+  if (bytes_per_chan == 2) {
     sampleFormat = SND_PCM_FORMAT_S16_LE;
   } else {
     error.errorState = SIMPLEAUDIO_ERROR;
@@ -96,18 +96,18 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
   
   /* initial allocation and audio buffer copy */
   audioBlob = createAudioBlob();
-  audioBlob->audioBuffer = PyMem_Malloc(lenSamples * bytesPerFrame);
-  memcpy(audioBlob->audioBuffer, audioData, lenSamples * bytesPerFrame);
-  audioBlob->samplesLeft = lenSamples;
+  audioBlob->audioBuffer = PyMem_Malloc(len_samples * bytesPerFrame);
+  memcpy(audioBlob->audioBuffer, audio_data, len_samples * bytesPerFrame);
+  audioBlob->samplesLeft = len_samples;
   audioBlob->samplesPlayed = 0;
   audioBlob->frameSize = bytesPerFrame;
   
   /* setup the linked list item for this playback buffer */
-  grabMutex(playListHead->mutex);
-  audioBlob->playListItem = newListItem(playListHead);
-  audioBlob->playListItem->playId = 0;
-  audioBlob->playListItem->stopFlag = 0;
-  releaseMutex(playListHead->mutex);
+  grabMutex(play_list_head->mutex);
+  audioBlob->playListItem = new_list_item(play_list_head);
+  audioBlob->playListItem->play_id = 0;
+  audioBlob->playListItem->stop_flag = 0;
+  releaseMutex(play_list_head->mutex);
   
   /* open access to a PCM device (blocking mode)  */
   result = snd_pcm_open(&audioBlob->handle, device, SND_PCM_STREAM_PLAYBACK, 0);
@@ -122,7 +122,7 @@ simpleaudioError_t playOS(void* audioData, int lenSamples, int numChannels,
 	}
   /* set the PCM params */
   result = snd_pcm_set_params(audioBlob->handle, sampleFormat, SND_PCM_ACCESS_RW_INTERLEAVED,
-    numChannels, sampleRate, RESAMPLE, LATENCY_US);
+    num_channels, sample_rate, RESAMPLE, LATENCY_US);
   if (result < 0) {	
     error.errorState = SIMPLEAUDIO_ERROR;
     error.code = (simpleaudioCode_t)result;

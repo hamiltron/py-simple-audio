@@ -15,7 +15,7 @@ typedef struct {
     int usedBytes;
     int lenBytes; 
     int buffers;
-    playItem_t* playListItem;
+    play_item_t* playListItem;
     void* list_mutex;
 } macAudioBlob_t;
 
@@ -36,7 +36,7 @@ void destroyAudioBlob(macAudioBlob_t* audioBlob) {
     
     PyMem_Free(audioBlob->audioBuffer);
     grab_mutex(audioBlob->list_mutex);
-    deleteListItem(audioBlob->playListItem);
+    delete_list_item(audioBlob->playListItem);
     release_mutex(audioBlob->list_mutex);
     PyMem_Free(audioBlob);
 }
@@ -51,18 +51,18 @@ static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffe
     macAudioBlob_t* audioBlob = (macAudioBlob_t*)param;
     int want = queueBuffer->mAudioDataBytesCapacity;
     int have = audioBlob->lenBytes-audioBlob->usedBytes; 
-    int stopFlag;
+    int stop_flag;
   
     grab_mutex(audioBlob->playListItem->mutex);
-    stopFlag = audioBlob->playListItem->stopFlag;
+    stop_flag = audioBlob->playListItem->stop_flag;
     release_mutex(audioBlob->playListItem->mutex);
     
     #if DEBUG == 2
-    fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stopFlag);
+    fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stop_flag);
     #endif
     
     /* if there's still audio yet to buffer ... */
-    if (have > 0 && !stopFlag) {
+    if (have > 0 && !stop_flag) {
         #if DEBUG == 2
         fprintf(DBG_OUT, DBG_PRE"still feeding queue\n");
         #endif
@@ -91,9 +91,9 @@ static void audioCallback(void* param, AudioQueueRef audioQueue, AudioQueueBuffe
     }
 }
 
-PyObject* play_os(void* audioData, len_samples_t lenSamples, int numChannels, int bytesPerChan, int sampleRate, playItem_t* playListHead) {
+PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
     #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audioData, lenSamples, numChannels, bytesPerChan, sampleRate, playListHead);
+    fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audio_data, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
     #endif
     
     char err_msg_buf[SA_ERR_STR_LEN];
@@ -103,33 +103,33 @@ PyObject* play_os(void* audioData, len_samples_t lenSamples, int numChannels, in
     /* signed 32-bit int - I think */
     OSStatus result;
     macAudioBlob_t* audioBlob;
-    size_t bytesPerFrame = bytesPerChan * numChannels;
+    size_t bytesPerFrame = bytes_per_chan * num_channels;
     int i;
     
     /* initial allocation and audio buffer copy */
     audioBlob = createAudioBlob();
-    audioBlob->list_mutex = playListHead->mutex;
-    audioBlob->audioBuffer = PyMem_Malloc(lenSamples * bytesPerFrame);
-    audioBlob->lenBytes = lenSamples * bytesPerFrame;
-    memcpy(audioBlob->audioBuffer, audioData, lenSamples * bytesPerFrame);
+    audioBlob->list_mutex = play_list_head->mutex;
+    audioBlob->audioBuffer = PyMem_Malloc(len_samples * bytesPerFrame);
+    audioBlob->lenBytes = len_samples * bytesPerFrame;
+    memcpy(audioBlob->audioBuffer, audio_data, len_samples * bytesPerFrame);
     audioBlob->usedBytes = 0;
     audioBlob->buffers = 0;
     memset(&audioFmt, 0, sizeof(audioFmt));
     
     /* setup the linked list item for this playback buffer */
-    grab_mutex(playListHead->mutex);
-    audioBlob->playListItem = newListItem(playListHead);
-    release_mutex(playListHead->mutex);
+    grab_mutex(play_list_head->mutex);
+    audioBlob->playListItem = new_list_item(play_list_head);
+    release_mutex(play_list_head->mutex);
     
     /* mac format header setup */
-    audioFmt.mSampleRate = sampleRate;
+    audioFmt.mSampleRate = sample_rate;
     audioFmt.mFormatID = kAudioFormatLinearPCM;
     audioFmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
     audioFmt.mFramesPerPacket = 1;
-    audioFmt.mChannelsPerFrame = numChannels;
+    audioFmt.mChannelsPerFrame = num_channels;
     audioFmt.mBytesPerFrame = bytesPerFrame;
     audioFmt.mBytesPerPacket = audioFmt.mBytesPerFrame * audioFmt.mFramesPerPacket;
-    audioFmt.mBitsPerChannel = bytesPerChan * 8;
+    audioFmt.mBitsPerChannel = bytes_per_chan * 8;
     
     result = AudioQueueNewOutput(&audioFmt, audioCallback, audioBlob, NULL, NULL, 0, &audioQueue);
     if(result != SUCCESS) {
@@ -170,6 +170,6 @@ PyObject* play_os(void* audioData, len_samples_t lenSamples, int numChannels, in
         return NULL;
     }
   
-    return PyLong_FromUnsignedLongLong(audioBlob->playListItem->playId);
+    return PyLong_FromUnsignedLongLong(audioBlob->playListItem->play_id);
 }
 
