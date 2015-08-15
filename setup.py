@@ -23,7 +23,7 @@ _simpleaudio_module = Extension(
     libraries=platform_libs,
     extra_link_args=platform_link_args,
     include_dirs=platform_inc_dirs,
-    define_macros = [('DEBUG', '2')])
+    define_macros = [('DEBUG', '1')])
 
 setup(name = 'simpleaudio',
     version = '1.0',

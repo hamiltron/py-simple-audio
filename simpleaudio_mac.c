@@ -20,9 +20,7 @@ typedef struct {
 } mac_audio_blob_t;
 
 void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
-    #endif
+    DBG_DESTROY_BLOB
 
     PyMem_Free(audio_blob->audio_buffer);
     grab_mutex(audio_blob->list_mutex);
@@ -82,9 +80,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 }
 
 PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audio_data, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
-    #endif
+    DBG_PLAY_OS_CALL
 
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
@@ -99,9 +95,7 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
     /* audio blob creation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
-    #endif
+    DBG_CREATE_BLOB
 
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->audio_buffer = PyMem_Malloc(len_samples * bytesPerFrame);
@@ -141,7 +135,7 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
         return NULL;
     }
 
-    #if DEBUG > 1
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_Q_BUFS, SIMPLEAUDIO_BUFSZ);
     #endif
     for(i = 0; i < NUM_Q_BUFS; i++) {

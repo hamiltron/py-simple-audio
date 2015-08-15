@@ -13,6 +13,21 @@
 #define DBG_OUT stdout
 #define DBG_PRE "[dbg] "
 
+/* some handy macros for debug prints used in ultiple places */
+#if DEBUG > 0
+    #define DBG_PLAY_OS_CALL \
+        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", \
+                audio_data, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
+        
+    #define DBG_DESTROY_BLOB fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob); 
+        
+    #define DBG_CREATE_BLOB fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
+#else
+    #define DBG_PLAY_OS_CALL
+    #define DBG_DESTROY_BLOB
+    #define DBG_CREATE_BLOB
+#endif
+
 enum {
     NOT_LAST_ITEM = 0,
     LAST_ITEM = 1
