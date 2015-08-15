@@ -2,18 +2,28 @@
 from setuptools import setup, Extension
 import sys
 
+platform_sources = []
+platform_libs = []
+platform_link_args = []
+platform_inc_dirs = []
+
 if sys.platform == 'darwin':
-    platform_audio = 'simpleaudio_mac.c'
-    platform_mutex = 'posix_mutex.c'
-    platform_libs = ['CoreAudio']
+    platform_sources = ['simpleaudio_mac.c', 'posix_mutex.c']
+    platform_link_args = ['-framework', 'AudioToolbox']
+elif sys.platform == 'linux':
+    platform_sources = ['simpleaudio_alsa.c', 'posix_mutex.c']
+    platform_inc_dirs = ['/usr/include/alsa']
+    platform_libs = []
 else:
     pass
     # define a compiler macro for unsupported ?
 
 _simpleaudio_module = Extension(
     '_simpleaudio', 
-    sources=['simpleaudio.c', platform_audio, platform_mutex],
-    extra_link_args=['-framework', 'AudioToolbox'],
+    sources=platform_sources+['simpleaudio.c'],
+    libraries=platform_libs,
+    extra_link_args=platform_link_args,
+    include_dirs=platform_inc_dirs,
     define_macros = [('DEBUG', '2')])
 
 setup(name = 'simpleaudio',

@@ -29,11 +29,11 @@ void destroyAudioBlob(winAudioBlob_t* audioBlob) {
   int lastItemStatus;
   
   PyMem_Free(audioBlob->audioBuffer);
-  grabMutex(mutex);
+  grab_mutex(mutex);
   lastItemStatus = delete_list_item(audioBlob->playListItem);
-  releaseMutex(mutex);
+  release_mutex(mutex);
   if (lastItemStatus == LAST_ITEM) {
-    destroyMutex(mutex);
+    destroy_mutex(mutex);
   }
   PyMem_Free(audioBlob);
 }
@@ -44,9 +44,9 @@ MMRESULT fillBuffer(WAVEHDR* waveHeader, winAudioBlob_t* audioBlob) {
   int stop_flag = 0;
   MMRESULT result;
   
-  grabMutex(audioBlob->playListItem->mutex);
+  grab_mutex(audioBlob->playListItem->mutex);
   stop_flag = audioBlob->playListItem->stop_flag;
-  releaseMutex(audioBlob->playListItem->mutex);
+  release_mutex(audioBlob->playListItem->mutex);
   
   /* if there's still audio yet to buffer ... */
   if (have > 0 && !stop_flag) {
@@ -120,11 +120,11 @@ simpleaudioError_t playOS(void* audio_data, int len_samples, int num_channels,
   audioBlob->numBuffers = 0;
   
   /* setup the linked list item for this playback buffer */
-  grabMutex(play_list_head->mutex);
+  grab_mutex(play_list_head->mutex);
   audioBlob->playListItem = new_list_item(play_list_head);
   audioBlob->playListItem->play_id = 0;
   audioBlob->playListItem->stop_flag = 0;
-  releaseMutex(play_list_head->mutex);
+  release_mutex(play_list_head->mutex);
   
   /* windows audio device and format headers setup */
   audioFmt.wFormatTag = WAVE_FORMAT_PCM;
