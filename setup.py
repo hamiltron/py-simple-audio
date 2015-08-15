@@ -12,8 +12,7 @@ if sys.platform == 'darwin':
     platform_link_args = ['-framework', 'AudioToolbox']
 elif sys.platform == 'linux':
     platform_sources = ['simpleaudio_alsa.c', 'posix_mutex.c']
-    platform_inc_dirs = ['/usr/include/alsa']
-    platform_libs = []
+    platform_libs = ['asound']
 else:
     pass
     # define a compiler macro for unsupported ?

@@ -1,5 +1,5 @@
 #include "simpleaudio.h"
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <pthread.h>
 #include <unistd.h>
 
