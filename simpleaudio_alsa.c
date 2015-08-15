@@ -58,8 +58,16 @@ void* playback_thread(void* thread_param) {
         audio_ptr = audio_blob->audio_buffer + (size_t)(audio_blob->samples_played * audio_blob->frame_size);
         result = snd_pcm_writei(audio_blob->handle, audio_ptr, play_samples);
         if (result < 0) {
+            #if DEBUG > 1
+            fprintf(DBG_OUT, DBG_PRE"snd_pcm_writei error code: %d\n", result);
+            #endif
+            
             result = snd_pcm_recover(audio_blob->handle, result, 0);
             if (result < 0) {
+                #if DEBUG > 1
+                fprintf(DBG_OUT, DBG_PRE"unrecoverable error - code: %d\n", result);
+                #endif
+                
                 /* unrecoverable error */
                 break;
             } 
@@ -78,7 +86,7 @@ void* playback_thread(void* thread_param) {
     destroy_audio_blob(audio_blob);
 
     #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"playback_thread_done");
+    fprintf(DBG_OUT, DBG_PRE"playback thread done");
     #endif
 
     pthread_exit(0);
