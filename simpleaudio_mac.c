@@ -20,7 +20,7 @@ typedef struct {
 } mac_audio_blob_t;
 
 void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
-    #ifdef DEBUG
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
     #endif
 
@@ -34,7 +34,7 @@ void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
 /* NOTE: like the official example code,
    OSX API calls are not checked for errors here */
 static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuffer *queue_buffer) {
-    #if DEBUG == 2
+    #if DEBUG > 1
     fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
     #endif
 
@@ -47,13 +47,13 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     stop_flag = audio_blob->play_list_item->stop_flag;
     release_mutex(audio_blob->play_list_item->mutex);
 
-    #if DEBUG == 2
+    #if DEBUG > 1
     fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stop_flag);
     #endif
 
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stop_flag) {
-        #if DEBUG == 2
+        #if DEBUG > 1
         fprintf(DBG_OUT, DBG_PRE"still feeding queue\n");
         #endif
 
@@ -64,7 +64,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
         AudioQueueEnqueueBuffer(audio_queue, queue_buffer, 0, NULL);
     /* ... no more audio left to buffer */
     } else {
-        #if DEBUG == 2
+        #if DEBUG > 1
         fprintf(DBG_OUT, DBG_PRE"done enqueue'ing - dellocating a buffer\n");
         #endif
 
@@ -82,7 +82,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 }
 
 PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
-    #ifdef DEBUG
+    #if DEBUG > 1
     fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", audio_data, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
     #endif
 
@@ -99,7 +99,7 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
     /* audio blob creation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));
 
-    #ifdef DEBUG
+    #if DEBUG > 1
     fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
     #endif
 
@@ -141,7 +141,7 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
         return NULL;
     }
 
-    #ifdef DEBUG
+    #if DEBUG > 1
     fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_Q_BUFS, SIMPLEAUDIO_BUFSZ);
     #endif
     for(i = 0; i < NUM_Q_BUFS; i++) {

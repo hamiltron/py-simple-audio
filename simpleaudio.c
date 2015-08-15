@@ -16,7 +16,7 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     unsigned int sample_rate;
     len_samples_t num_samples;
 
-    #ifdef DEBUG
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
     #endif
 
@@ -88,7 +88,7 @@ PyInit_spam(void)
 /*********************************************/
 
 void delete_list_item(play_item_t* play_item) {
-    #ifdef DEBUG
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", play_item, play_item->play_id, play_item->prev_item, play_item->next_item);
     #endif
 
@@ -122,7 +122,7 @@ play_item_t* new_list_item(play_item_t* list_head) {
     newItem->play_id = (list_head->play_id)++;
     newItem->stop_flag = SA_CLEAR;
 
-    #ifdef DEBUG
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", newItem, newItem->play_id, oldTail);
     #endif
 
