@@ -14,8 +14,8 @@
 #define DBG_PRE "[dbg] "
 
 enum {
-  NOT_LAST_ITEM = 0,
-  LAST_ITEM = 1
+    NOT_LAST_ITEM = 0,
+    LAST_ITEM = 1
 };
 
 typedef unsigned long long play_id_t;
@@ -23,15 +23,15 @@ typedef unsigned long long len_samples_t;
 
 /* linked list structure used to track the active playback items/threads */
 typedef struct play_item_s {
-  /* the play_id of the list head is used to store the next play_id value
-     used by a new play list item */
-  play_id_t play_id;
-  int stop_flag;
-  struct play_item_s* prev_item;
-  struct play_item_s* next_item;
-  /* the mutex of the list head is used as a 'global' mutex for modifying
-     and accessing the list itself */
-  void* mutex;
+    /* the play_id of the list head is used to store the next play_id value
+       used by a new play list item */
+    play_id_t play_id;
+    int stop_flag;
+    struct play_item_s* prev_item;
+    struct play_item_s* next_item;
+    /* the mutex of the list head is used as a 'global' mutex for modifying
+       and accessing the list itself */
+    void* mutex;
 } play_item_t;
 
 /* prototypes */
