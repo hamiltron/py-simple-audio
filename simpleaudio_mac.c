@@ -8,7 +8,7 @@
 
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, code); \
-    PyErr_SetString(PyExc_Exception, str_ptr);
+    PyErr_SetString(sa_python_error, str_ptr);
 
 typedef struct {
     void* audio_buffer;

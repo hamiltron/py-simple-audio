@@ -49,6 +49,8 @@ typedef struct play_item_s {
     void* mutex;
 } play_item_t;
 
+extern PyObject* sa_python_error;
+
 /* prototypes */
 PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head);
 

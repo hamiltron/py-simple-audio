@@ -1,5 +1,7 @@
 #include "simpleaudio.h"
 
+PyObject* sa_python_error;
+
 play_item_t play_list_head = {
     .play_id = 0,
     .stop_flag = SA_CLEAR,
@@ -52,8 +54,6 @@ static struct PyModuleDef _simpleaudio_module = {
    _simpleaudio_methods
 };
 
-static PyObject *AudioError;
-
 PyMODINIT_FUNC
 PyInit__simpleaudio(void)
 {
@@ -63,9 +63,9 @@ PyInit__simpleaudio(void)
     if (m == NULL)
         return NULL;
 
-    AudioError = PyErr_NewException("simpleaudio.error", NULL, NULL);
-    Py_INCREF(AudioError);
-    PyModule_AddObject(m, "error", AudioError);
+    sa_python_error = PyErr_NewException("_simpleaudio.SimpleaudioError", NULL, NULL);
+    Py_INCREF(sa_python_error);
+    PyModule_AddObject(m, "SimpleaudioError", sa_python_error);
 
     /* initialize the list head mutex */
     play_list_head.mutex = create_mutex();

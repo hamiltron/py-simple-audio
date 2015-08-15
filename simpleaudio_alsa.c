@@ -5,7 +5,7 @@
 
 #define ALSA_EXCEPTION(my_msg, code, err_msg, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d -- MSG: %s", my_msg, code, err_msg); \
-    PyErr_SetString(PyExc_Exception, str_ptr);
+    PyErr_SetString(sa_python_error, str_ptr);
 
 #define RESAMPLE (1)
 #define LATENCY_US (100000) /* 100 ms */
