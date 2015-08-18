@@ -11,7 +11,7 @@
 #define LATENCY_US (100000) /* 100 ms */
 
 typedef struct {
-    void* audio_buffer;
+    Py_buffer buffer_obj;
     snd_pcm_t* handle;
     int samples_left;
     int samples_played;
@@ -23,7 +23,14 @@ typedef struct {
 void destroy_audio_blob(alsa_audio_blob_t* audio_blob) {
     DBG_DESTROY_BLOB
 
-    PyMem_Free(audio_blob->audio_buffer);
+    PyGILState_STATE gstate;
+
+    /* release the buffer view so Python can
+       decrement it's refernce count*/
+    gstate = PyGILState_Ensure();
+    PyBuffer_Release(&audio_blob->buffer_obj);
+    PyGILState_Release(gstate);
+
     grab_mutex(audio_blob->list_mutex);
     delete_list_item(audio_blob->play_list_item);
     release_mutex(audio_blob->list_mutex);
@@ -31,7 +38,7 @@ void destroy_audio_blob(alsa_audio_blob_t* audio_blob) {
 }
 
 void* playback_thread(void* thread_param) {
-    #if DEBUG > 0 
+    #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"playback thread started with audio blob at %p\n", thread_param);
     #endif
 
@@ -55,22 +62,22 @@ void* playback_thread(void* thread_param) {
         } else {
             play_samples = SIMPLEAUDIO_BUFSZ / audio_blob->frame_size;
         }
-        audio_ptr = audio_blob->audio_buffer + (size_t)(audio_blob->samples_played * audio_blob->frame_size);
+        audio_ptr = audio_blob->buffer_obj.buf + (size_t)(audio_blob->samples_played * audio_blob->frame_size);
         result = snd_pcm_writei(audio_blob->handle, audio_ptr, play_samples);
         if (result < 0) {
             #if DEBUG > 1
             fprintf(DBG_OUT, DBG_PRE"snd_pcm_writei error code: %d\n", result);
             #endif
-            
+
             result = snd_pcm_recover(audio_blob->handle, result, 0);
             if (result < 0) {
                 #if DEBUG > 1
                 fprintf(DBG_OUT, DBG_PRE"unrecoverable error - code: %d\n", result);
                 #endif
-                
+
                 /* unrecoverable error */
                 break;
-            } 
+            }
         } else {
             audio_blob->samples_played += result;
             audio_blob->samples_left -= result;
@@ -92,9 +99,9 @@ void* playback_thread(void* thread_param) {
     pthread_exit(0);
 }
 
-PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
     DBG_PLAY_OS_CALL
-    
+
     char err_msg_buf[SA_ERR_STR_LEN];
     alsa_audio_blob_t* audio_blob;
     int bytesPerFrame = bytes_per_chan * num_channels;
@@ -116,10 +123,9 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
 
     DBG_CREATE_BLOB
 
+    audio_blob->buffer_obj = buffer_obj;
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->handle = NULL;
-    audio_blob->audio_buffer = PyMem_Malloc(len_samples * bytesPerFrame);
-    memcpy(audio_blob->audio_buffer, audio_data, len_samples * bytesPerFrame);
     audio_blob->samples_left = len_samples;
     audio_blob->samples_played = 0;
     audio_blob->frame_size = bytesPerFrame;

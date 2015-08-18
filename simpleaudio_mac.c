@@ -11,7 +11,7 @@
     PyErr_SetString(sa_python_error, str_ptr);
 
 typedef struct {
-    void* audio_buffer;
+    Py_buffer buffer_obj;
     int used_bytes;
     int len_bytes;
     int buffers;
@@ -22,7 +22,14 @@ typedef struct {
 void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
     DBG_DESTROY_BLOB
 
-    PyMem_Free(audio_blob->audio_buffer);
+    PyGILState_STATE gstate;
+
+    /* release the buffer view so Python can
+       decrement it's refernce count*/
+    gstate = PyGILState_Ensure();
+    PyBuffer_Release(&audio_blob->buffer_obj);
+    PyGILState_Release(gstate);
+
     grab_mutex(audio_blob->list_mutex);
     delete_list_item(audio_blob->play_list_item);
     release_mutex(audio_blob->list_mutex);
@@ -56,7 +63,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
         #endif
 
         if (have > want) {have = want;}
-        memcpy(queue_buffer->mAudioData, &audio_blob->audio_buffer[audio_blob->used_bytes], have);
+        memcpy(queue_buffer->mAudioData, audio_blob->buffer_obj.buf + (size_t)(audio_blob->used_bytes), have);
         queue_buffer->mAudioDataByteSize = have;
         audio_blob->used_bytes += have;
         AudioQueueEnqueueBuffer(audio_queue, queue_buffer, 0, NULL);
@@ -79,7 +86,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     }
 }
 
-PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
     DBG_PLAY_OS_CALL
 
     char err_msg_buf[SA_ERR_STR_LEN];
@@ -97,10 +104,9 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
 
     DBG_CREATE_BLOB
 
+    audio_blob->buffer_obj = buffer_obj;
     audio_blob->list_mutex = play_list_head->mutex;
-    audio_blob->audio_buffer = PyMem_Malloc(len_samples * bytesPerFrame);
     audio_blob->len_bytes = len_samples * bytesPerFrame;
-    memcpy(audio_blob->audio_buffer, audio_data, len_samples * bytesPerFrame);
     audio_blob->used_bytes = 0;
     audio_blob->buffers = 0;
     memset(&audio_fmt, 0, sizeof(audio_fmt));

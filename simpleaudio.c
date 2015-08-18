@@ -12,7 +12,7 @@ play_item_t play_list_head = {
 static PyObject* play_buffer(PyObject *self, PyObject *args)
 {
     PyObject* audio_obj;
-    Py_buffer audio_buffer;
+    Py_buffer buffer_obj;
     unsigned int num_channels;
     unsigned int bytes_per_sample;
     unsigned int sample_rate;
@@ -26,31 +26,31 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (PyObject_GetBuffer(audio_obj, &audio_buffer, PyBUF_SIMPLE) == -1) {
+    if (PyObject_GetBuffer(audio_obj, &buffer_obj, PyBUF_SIMPLE) == -1) {
         /* could not get buffer -PyObject_GetBuffer
            should have set the appropriate error
         */
         return NULL;
     }
 
-    
+
     if (bytes_per_sample < 1 || bytes_per_sample > 3) {
         PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit), 2 (16-bit), or 3 (24-bit).");
         return NULL;
     }
 
-    if (num_channels < 1 | num_channels > 2) {
+    if (num_channels < 1 || num_channels > 2) {
         PyErr_SetString(PyExc_ValueError, "Number of channels must be 1 or 2.");
         return NULL;
     }
 
-    if (sample_rate != 8000 && 
-            sample_rate != 11025 && 
-            sample_rate != 16000 && 
+    if (sample_rate != 8000 &&
+            sample_rate != 11025 &&
+            sample_rate != 16000 &&
             sample_rate != 22050 &&
-            sample_rate != 32000 && 
+            sample_rate != 32000 &&
             sample_rate != 44100 &&
-            sample_rate != 48000 && 
+            sample_rate != 48000 &&
             sample_rate != 88200 &&
             sample_rate != 96000 &&
             sample_rate != 192000) {
@@ -58,8 +58,14 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    num_samples = audio_buffer.len / bytes_per_sample / num_channels;
-    return play_os(audio_buffer.buf, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head);
+    num_samples = buffer_obj.len / bytes_per_sample / num_channels;
+
+    /* explicitly tell Python we're using threading since the
+       it requires a cross-thread API call to release the buffer
+       view when we're done playing audio */
+    PyEval_InitThreads();
+
+    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head);
 }
 
 static PyMethodDef _simpleaudio_methods[] = {

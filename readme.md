@@ -21,7 +21,9 @@
 * change len_samples type
 * remove create_audio_blob 
 * add debug prints
+* use Python buffer instead of copying the audio data
 
 ## investigate
 
 * test what happens when the audio is short enough that only 1 of the buffers is needed on OSX and win
+* see if ALSA or win have basic volume control
