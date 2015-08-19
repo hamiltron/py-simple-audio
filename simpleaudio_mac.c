@@ -109,7 +109,6 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
     audio_blob->len_bytes = len_samples * bytesPerFrame;
     audio_blob->used_bytes = 0;
     audio_blob->buffers = 0;
-    memset(&audio_fmt, 0, sizeof(audio_fmt));
 
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
@@ -117,6 +116,7 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
     release_mutex(play_list_head->mutex);
 
     /* mac format header setup */
+    memset(&audio_fmt, 0, sizeof(audio_fmt));
     audio_fmt.mSampleRate = sample_rate;
     audio_fmt.mFormatID = kAudioFormatLinearPCM;
     audio_fmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
