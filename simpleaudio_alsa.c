@@ -99,7 +99,7 @@ void* playback_thread(void* thread_param) {
     pthread_exit(0);
 }
 
-PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
     char err_msg_buf[SA_ERR_STR_LEN];
     alsa_audio_blob_t* audio_blob;
     int bytesPerFrame = bytes_per_chan * num_channels;

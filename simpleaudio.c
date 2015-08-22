@@ -18,7 +18,7 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     unsigned int num_channels;
     unsigned int bytes_per_sample;
     unsigned int sample_rate;
-    len_samples_t num_samples;
+    int num_samples;
 
     #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");

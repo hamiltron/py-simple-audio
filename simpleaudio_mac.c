@@ -14,7 +14,7 @@ typedef struct {
     Py_buffer buffer_obj;
     int used_bytes;
     int len_bytes;
-    int buffers;
+    int num_buffers;
     play_item_t* play_list_item;
     void* list_mutex;
 } mac_audio_blob_t;
@@ -73,11 +73,11 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
         fprintf(DBG_OUT, DBG_PRE"done enqueue'ing - dellocating a buffer\n");
         #endif
 
-        if (audio_blob->buffers > 0) {
+        if (audio_blob->num_buffers > 0) {
             AudioQueueFreeBuffer(audio_queue, queue_buffer);
-            audio_blob->buffers--;
+            audio_blob->num_buffers--;
         }
-        if (audio_blob->buffers == 0) {
+        if (audio_blob->num_buffers == 0) {
             /* all done, cleanup */
             AudioQueueStop(audio_queue, true);
             AudioQueueDispose(audio_queue, true);
@@ -86,7 +86,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     }
 }
 
-PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
     AudioStreamBasicDescription audio_fmt;
@@ -108,7 +108,7 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytesPerFrame;
     audio_blob->used_bytes = 0;
-    audio_blob->buffers = 0;
+    audio_blob->num_buffers = 0;
 
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
@@ -152,7 +152,7 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
             destroy_audio_blob(audio_blob);
             return NULL;
         }
-        audio_blob->buffers++;
+        audio_blob->num_buffers++;
         /* fill a buffer using the callback */
         audio_callback(audio_blob, audio_queue, queue_buffer);
     }

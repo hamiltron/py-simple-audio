@@ -16,7 +16,7 @@
 /* some handy macros for debug prints used in ultiple places */
 #if DEBUG > 0
     #define DBG_PLAY_OS_CALL \
-        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %llu samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", \
+        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %d samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p\n", \
                 buffer_obj.buf, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head);
 
     #define DBG_DESTROY_BLOB fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
@@ -34,7 +34,6 @@ enum {
 };
 
 typedef unsigned long long play_id_t;
-typedef unsigned long long len_samples_t;
 
 /* linked list structure used to track the active playback items/threads */
 typedef struct play_item_s {
@@ -52,7 +51,7 @@ typedef struct play_item_s {
 extern PyObject* sa_python_error;
 
 /* prototypes */
-PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head);
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head);
 
 void delete_list_item(play_item_t* play_item);
 play_item_t* new_list_item(play_item_t* list_head);
