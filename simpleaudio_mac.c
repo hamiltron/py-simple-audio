@@ -20,9 +20,9 @@ typedef struct {
 } mac_audio_blob_t;
 
 void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
-    DBG_DESTROY_BLOB
-
     PyGILState_STATE gstate;
+    
+    DBG_DESTROY_BLOB
 
     /* release the buffer view so Python can
        decrement it's refernce count*/
@@ -39,14 +39,14 @@ void destroy_audio_blob(mac_audio_blob_t* audio_blob) {
 /* NOTE: like the official example code,
    OSX API calls are not checked for errors here */
 static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuffer *queue_buffer) {
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
-    #endif
-
     mac_audio_blob_t* audio_blob = (mac_audio_blob_t*)param;
     int want = queue_buffer->mAudioDataBytesCapacity;
     int have = audio_blob->len_bytes-audio_blob->used_bytes;
     int stop_flag;
+
+    #if DEBUG > 1
+    fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
+    #endif
 
     grab_mutex(audio_blob->play_list_item->mutex);
     stop_flag = audio_blob->play_list_item->stop_flag;
@@ -87,8 +87,6 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 }
 
 PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
-    DBG_PLAY_OS_CALL
-
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
     AudioStreamBasicDescription audio_fmt;
@@ -98,6 +96,8 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
     mac_audio_blob_t* audio_blob;
     size_t bytesPerFrame = bytes_per_chan * num_channels;
     int i;
+
+    DBG_PLAY_OS_CALL
 
     /* audio blob creation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));

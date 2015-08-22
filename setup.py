@@ -13,6 +13,8 @@ if sys.platform == 'darwin':
 elif sys.platform == 'linux':
     platform_sources = ['simpleaudio_alsa.c', 'posix_mutex.c']
     platform_libs = ['asound']
+elif sys.platform == 'win32':
+    platform_sources = ['simpleaudio_win.c', 'windows_mutex.c']
 else:
     pass
     # define a compiler macro for unsupported ?

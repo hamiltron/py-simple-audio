@@ -3,11 +3,13 @@
 PyObject* sa_python_error;
 
 play_item_t play_list_head = {
-    .play_id = 0,
-    .stop_flag = SA_CLEAR,
-    .prev_item = NULL,
-    .next_item = NULL,
-    .mutex = NULL};
+    0,         /* play_id */
+    SA_CLEAR,  /* stop_flag */
+    NULL,      /* prev_item */
+    NULL,      /* next_item */
+    NULL       /* mutex */
+};
+
 
 static PyObject* play_buffer(PyObject *self, PyObject *args)
 {

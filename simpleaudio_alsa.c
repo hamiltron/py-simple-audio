@@ -21,9 +21,9 @@ typedef struct {
 } alsa_audio_blob_t;
 
 void destroy_audio_blob(alsa_audio_blob_t* audio_blob) {
-    DBG_DESTROY_BLOB
-
     PyGILState_STATE gstate;
+    
+    DBG_DESTROY_BLOB
 
     /* release the buffer view so Python can
        decrement it's refernce count*/
@@ -38,15 +38,15 @@ void destroy_audio_blob(alsa_audio_blob_t* audio_blob) {
 }
 
 void* playback_thread(void* thread_param) {
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"playback thread started with audio blob at %p\n", thread_param);
-    #endif
-
     alsa_audio_blob_t* audio_blob = (alsa_audio_blob_t*)thread_param;
     void* audio_ptr;
     int play_samples;
     int result;
     int stop_flag = 0;
+
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"playback thread started with audio blob at %p\n", thread_param);
+    #endif
 
     while (audio_blob->samples_left > 0 && !stop_flag) {
         grab_mutex(audio_blob->play_list_item->mutex);
@@ -100,8 +100,6 @@ void* playback_thread(void* thread_param) {
 }
 
 PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
-    DBG_PLAY_OS_CALL
-
     char err_msg_buf[SA_ERR_STR_LEN];
     alsa_audio_blob_t* audio_blob;
     int bytesPerFrame = bytes_per_chan * num_channels;
@@ -109,6 +107,8 @@ PyObject* play_os(Py_buffer buffer_obj, len_samples_t len_samples, int num_chann
     snd_pcm_format_t sample_format;
     pthread_t play_thread;
     int result;
+
+    DBG_PLAY_OS_CALL
 
     /* set that format appropriately */
     if (bytes_per_chan == 2) {

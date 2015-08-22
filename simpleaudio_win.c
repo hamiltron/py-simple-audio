@@ -25,16 +25,10 @@ typedef struct {
   void* list_mutex;
 } win_audio_blob_t;
 
-win_audio_blob_t* createAudioBlob(void) {
-  win_audio_blob_t* audio_blob = PyMem_Malloc(sizeof(win_audio_blob_t));
-  audio_blob->audio_buffer = NULL;
-  return audio_blob;
-}
-
 void destroy_audio_blob(win_audio_blob_t* audio_blob) {
-    DBG_DESTROY_BLOB
-
     PyGILState_STATE gstate;
+        
+    DBG_DESTROY_BLOB
 
     /* release the buffer view so Python can
        decrement it's refernce count*/
@@ -63,7 +57,7 @@ MMRESULT fillBuffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
     if (have > want) {have = want;}
     result = waveOutUnprepareHeader(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
     if (result != MMSYSERR_NOERROR) {return result;}
-    memcpy(wave_header->lpData, &((char*)audio_blob->audio_buffer)[audio_blob->used_bytes], have);
+    memcpy(wave_header->lpData, &((char*)audio_blob->buffer_obj.buf)[audio_blob->used_bytes], have);
     result = waveOutPrepareHeader(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
     if (result != MMSYSERR_NOERROR) {return result;}
     result = waveOutWrite(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
@@ -109,8 +103,6 @@ DWORD WINAPI bufferThread(LPVOID threadParam) {
 }
 
 PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
-    DBG_PLAY_OS_CALL
-
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
     win_audio_blob_t* audio_blob;
@@ -121,6 +113,8 @@ PyObject* play_os(void* audio_data, len_samples_t len_samples, int num_channels,
     int bytes_per_frame = bytes_per_chan * num_channels;
     WAVEHDR* temp_wave_hdr;
     int i;
+    
+    DBG_PLAY_OS_CALL
     
     /* initial allocation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(win_audio_blob_t));
