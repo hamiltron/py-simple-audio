@@ -30,10 +30,20 @@ _simpleaudio_module = Extension(
     extra_link_args=platform_link_args,
     define_macros = [('DEBUG', '1')])
 
-setup(name = 'simpleaudio',
-    version = '1.0',
+_VERSION = "0.1.0"
+
+setup(
+    name = 'simpleaudio',
+    packages = ['simpleaudio'],
+    version = _VERSION,
     description = """The simpleaudio package contains the simpleaudio module
-                     which makes playing wave files in Python very simple.""",
+                     which makes playing wave audio in Python very simple.""",
+    author = 'Joe Hamilton',
+    author_email = 'jhamilton10@georgefox.edu',
+    url = 'https://github.com/hamiltron/simpleaudio', 
+    download_url = 'https://github.com/hamiltron/simpleaudio/tarball/'+_VERSION, 
+    keywords = ['audio', 'wave', 'media', 'multimedia', 'sound', 'alsa', 'coreaudio', 'winmm', 'music'], 
+    classifiers = [],
     test_suite="tests",
     py_modules = ["simpleaudio.shiny"],
     ext_modules = [_simpleaudio_module])
