@@ -1,3 +1,9 @@
+/* 
+Simpleaudio Python Extension
+Copyright (C) 2015, Joe Hamilton 
+MIT License (see LICENSE.txt)
+*/
+
 #include "simpleaudio.h"
 
 PyObject* sa_python_error;

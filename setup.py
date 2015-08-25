@@ -1,3 +1,7 @@
+# Simpleaudio Python Extension
+# Copyright (C) 2015, Joe Hamilton 
+# MIT License (see LICENSE.txt)
+
 #from distutils.core import setup, Extension
 from setuptools import setup, Extension
 import sys

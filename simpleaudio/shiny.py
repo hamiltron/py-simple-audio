@@ -1,3 +1,7 @@
+# Simpleaudio Python Extension
+# Copyright (C) 2015, Joe Hamilton 
+# MIT License (see LICENSE.txt)
+
 from _simpleaudio import play_buffer
 
 def play_wave_read(wave_read):
