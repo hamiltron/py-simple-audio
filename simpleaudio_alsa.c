@@ -22,6 +22,7 @@ typedef struct {
     int samples_left;
     int samples_played;
     int frame_size;
+    int buffer_size;
     play_item_t* play_list_item;
     void* list_mutex;
 } alsa_audio_blob_t;
@@ -63,10 +64,10 @@ void* playback_thread(void* thread_param) {
         fprintf(DBG_OUT, DBG_PRE"loop iteration with stop flag: %d\n", stop_flag);
         #endif
 
-        if (audio_blob->samples_left < SIMPLEAUDIO_BUFSZ / audio_blob->frame_size) {
+        if (audio_blob->samples_left < audio_blob->buffer_size / audio_blob->frame_size) {
             play_samples = audio_blob->samples_left;
         } else {
-            play_samples = SIMPLEAUDIO_BUFSZ / audio_blob->frame_size;
+            play_samples = audio_blob->buffer_size / audio_blob->frame_size;
         }
         audio_ptr = audio_blob->buffer_obj.buf + (size_t)(audio_blob->samples_played * audio_blob->frame_size);
         result = snd_pcm_writei(audio_blob->handle, audio_ptr, play_samples);
@@ -105,10 +106,11 @@ void* playback_thread(void* thread_param) {
     pthread_exit(0);
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
     char err_msg_buf[SA_ERR_STR_LEN];
     alsa_audio_blob_t* audio_blob;
-    int bytesPerFrame = bytes_per_chan * num_channels;
+    int bytes_per_frame = bytes_per_chan * num_channels;
     static char *device = "default";
     snd_pcm_format_t sample_format;
     pthread_t play_thread;
@@ -134,8 +136,9 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->handle = NULL;
     audio_blob->samples_left = len_samples;
     audio_blob->samples_played = 0;
-    audio_blob->frame_size = bytesPerFrame;
-
+    audio_blob->frame_size = bytes_per_frame;
+    audio_blob->buffer_size = buffer_size;
+    
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
     audio_blob->play_list_item = new_list_item(play_list_head);

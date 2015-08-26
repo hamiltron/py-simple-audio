@@ -25,4 +25,6 @@
 
 ## investigate
 
-* test what happens when the audio is short enough that only 1 of the buffers is needed on OSX and win
+* test what happens when the audio is short enough that only 1 of the buffers is needed on OSX and WIN
+* when windows playback handle needs to be freed
+* look into alsa and windows handle release on playback errors

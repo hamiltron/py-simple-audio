@@ -108,7 +108,8 @@ DWORD WINAPI bufferThread(LPVOID threadParam) {
   return 0;
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
     win_audio_blob_t* audio_blob;
@@ -178,8 +179,8 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     for (i = 0; i < 2; i++) {
         temp_wave_hdr = PyMem_Malloc(sizeof(WAVEHDR));
         memset(temp_wave_hdr, 0, sizeof(WAVEHDR));
-        temp_wave_hdr->lpData = PyMem_Malloc(SIMPLEAUDIO_BUFSZ);
-        temp_wave_hdr->dwBufferLength = SIMPLEAUDIO_BUFSZ;
+        temp_wave_hdr->lpData = PyMem_Malloc(buffer_size);
+        temp_wave_hdr->dwBufferLength = buffer_size;
 
         result = fillBuffer(temp_wave_hdr, audio_blob);
         if (result != MMSYSERR_NOERROR) {

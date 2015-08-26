@@ -21,11 +21,12 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
 {
     PyObject* audio_obj;
     Py_buffer buffer_obj;
-    unsigned int num_channels;
-    unsigned int bytes_per_sample;
-    unsigned int sample_rate;
+    int num_channels;
+    int bytes_per_sample;
+    int sample_rate;
     int num_samples;
-
+    int buffer_size;
+    
     #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
     #endif
@@ -42,8 +43,8 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     }
 
 
-    if (bytes_per_sample < 1 || bytes_per_sample > 3) {
-        PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit), 2 (16-bit), or 3 (24-bit).");
+    if (bytes_per_sample < 1 || bytes_per_sample > 2) {
+        PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit) or 2 (16-bit).");
         return NULL;
     }
 
@@ -66,23 +67,29 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
+    if (buffer_obj.len % (bytes_per_sample * num_channels) != 0) {
+        PyErr_SetString(PyExc_ValueError, "Buffer size (in bytes) is not a multiple of bytes-per-sample and the number of channels.");
+        return NULL;
+    }
     num_samples = buffer_obj.len / bytes_per_sample / num_channels;
+    
+    /* fixed 100ms latency */
+    buffer_size = get_buffer_size(100000, sample_rate, bytes_per_sample * num_channels);
 
     /* explicitly tell Python we're using threading since the
        it requires a cross-thread API call to release the buffer
        view when we're done playing audio */
     PyEval_InitThreads();
 
-    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head);
+    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head, buffer_size);
 }
 
 static PyMethodDef _simpleaudio_methods[] = {
-    {"play_buffer",  play_buffer, METH_VARARGS,
-     "Play audio from a buffer."},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+    {"play_buffer",  play_buffer, METH_VARARGS, "Play audio from an object supporting the buffer interface."},
+    {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
-static char doc_string [] = "_simpleaudio is the module containing the C-extension that actually does all the work.";
+static char doc_string [] = "_simpleaudio is the module containing the C-extension that handles the low-level OS-specific API interactions for audio playback.";
 
 static struct PyModuleDef _simpleaudio_module = {
    PyModuleDef_HEAD_INIT,
@@ -169,3 +176,13 @@ play_item_t* new_list_item(play_item_t* list_head) {
 }
 
 /********************************************/
+
+int get_buffer_size(int latency_us, int sample_rate, int frame_size) {
+    int sample_count;
+    int increments;
+    
+    sample_count = (long long)latency_us * sample_rate / 1000000;
+    if (sample_count < 1) { sample_count = 1; }
+    increments = (sample_count * frame_size - 1) / SA_BUFFER_INC + 1;
+    return increments * SA_BUFFER_INC;
+}

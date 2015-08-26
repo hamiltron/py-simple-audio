@@ -92,7 +92,8 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     }
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head) {
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
     AudioStreamBasicDescription audio_fmt;
@@ -148,10 +149,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
 
     #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_Q_BUFS, SIMPLEAUDIO_BUFSZ);
+    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers\n", NUM_Q_BUFS);
     #endif
     for(i = 0; i < NUM_Q_BUFS; i++) {
-        result = AudioQueueAllocateBuffer(audio_queue, SIMPLEAUDIO_BUFSZ, &queue_buffer);
+        result = AudioQueueAllocateBuffer(audio_queue, buffer_size, &queue_buffer);
         if (result != SUCCESS) {
             MAC_EXCEPTION("Unable to allocate buffer.", result, err_msg_buf);
             AudioQueueDispose(audio_queue,true);
