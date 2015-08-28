@@ -25,7 +25,6 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     int bytes_per_sample;
     int sample_rate;
     int num_samples;
-    int buffer_size;
     
     #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
@@ -72,16 +71,14 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
     num_samples = buffer_obj.len / bytes_per_sample / num_channels;
-    
-    /* fixed 100ms latency */
-    buffer_size = get_buffer_size(100000, sample_rate, bytes_per_sample * num_channels);
 
     /* explicitly tell Python we're using threading since the
        it requires a cross-thread API call to release the buffer
        view when we're done playing audio */
     PyEval_InitThreads();
 
-    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head, buffer_size);
+    /* fixed 100ms latency */
+    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head, SA_LATENCY_US);
 }
 
 static PyMethodDef _simpleaudio_methods[] = {

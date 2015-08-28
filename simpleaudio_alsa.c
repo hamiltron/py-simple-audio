@@ -14,7 +14,6 @@ MIT License (see LICENSE.txt)
     PyErr_SetString(sa_python_error, str_ptr);
 
 #define RESAMPLE (1)
-#define LATENCY_US (100000) /* 100 ms */
 
 typedef struct {
     Py_buffer buffer_obj;
@@ -107,7 +106,7 @@ void* playback_thread(void* thread_param) {
 }
 
 PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
-                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
+                  int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     alsa_audio_blob_t* audio_blob;
     int bytes_per_frame = bytes_per_chan * num_channels;
@@ -153,7 +152,8 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
      }
 
     /* set the PCM params */
-    result = snd_pcm_set_params(audio_blob->handle, sample_format, SND_PCM_ACCESS_RW_INTERLEAVED, num_channels, sample_rate, RESAMPLE, LATENCY_US);
+    result = snd_pcm_set_params(audio_blob->handle, sample_format, SND_PCM_ACCESS_RW_INTERLEAVED, 
+                                num_channels, sample_rate, RESAMPLE, latency_us);
     if (result < 0) {
         ALSA_EXCEPTION("Error setting parameters.", result, snd_strerror(result), err_msg_buf);
         snd_pcm_close(audio_blob->handle);

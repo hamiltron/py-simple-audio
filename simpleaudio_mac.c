@@ -10,7 +10,7 @@ MIT License (see LICENSE.txt)
 /* this should be replaced by whatever constant Apple has designated */
 #define SUCCESS (0)
 
-#define NUM_Q_BUFS (2)
+#define NUM_BUFS (2)
 
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, code); \
@@ -93,7 +93,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 }
 
 PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
-                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
+                  int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
     AudioStreamBasicDescription audio_fmt;
@@ -102,9 +102,12 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     OSStatus result;
     mac_audio_blob_t* audio_blob;
     size_t bytesPerFrame = bytes_per_chan * num_channels;
+    int buffer_size;
     int i;
 
     DBG_PLAY_OS_CALL
+
+    buffer_size = get_buffer_size(latency_us / NUM_BUFS, sample_rate, bytes_per_chan);
 
     /* audio blob creation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));
@@ -149,9 +152,9 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
 
     #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers\n", NUM_Q_BUFS);
+    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_BUFS, buffer_size);
     #endif
-    for(i = 0; i < NUM_Q_BUFS; i++) {
+    for(i = 0; i < NUM_BUFS; i++) {
         result = AudioQueueAllocateBuffer(audio_queue, buffer_size, &queue_buffer);
         if (result != SUCCESS) {
             MAC_EXCEPTION("Unable to allocate buffer.", result, err_msg_buf);

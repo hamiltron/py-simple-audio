@@ -15,7 +15,9 @@ MIT License (see LICENSE.txt)
 #define SA_CLEAR (0)
 #define SA_STOP (1)
 
-#define SA_BUFFER_INC (512)
+#define SA_BUFFER_INC (256)
+
+#define SA_LATENCY_US (100000)
 
 #define DBG_OUT stdout
 #define DBG_PRE "[dbg] "
@@ -23,8 +25,8 @@ MIT License (see LICENSE.txt)
 /* some handy macros for debug prints used in ultiple places */
 #if DEBUG > 0
     #define DBG_PLAY_OS_CALL \
-        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %d samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p, buffer size %d\n", \
-                buffer_obj.buf, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head, buffer_size);
+        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %d samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p, latency (microseconds) %d\n", \
+                buffer_obj.buf, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head, latency_us);
 
     #define DBG_DESTROY_BLOB fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
 
@@ -58,7 +60,7 @@ typedef struct play_item_s {
 extern PyObject* sa_python_error;
 
 /* prototypes */
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head, int buffer_size);
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, int sample_rate, play_item_t* play_list_head, int latency_us);
 
 void delete_list_item(play_item_t* play_item);
 play_item_t* new_list_item(play_item_t* list_head);

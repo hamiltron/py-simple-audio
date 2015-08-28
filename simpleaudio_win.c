@@ -11,6 +11,8 @@ MIT License (see LICENSE.txt)
 
 #define SYS_STR_LEN (SA_ERR_STR_LEN / 2)
 
+#define NUM_BUFS (2)
+
 #define WIN_EXCEPTION(my_msg, code, err_msg, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d -- MSG: %s", my_msg, code, err_msg); \
     PyErr_SetString(sa_python_error, str_ptr);
@@ -109,7 +111,7 @@ DWORD WINAPI bufferThread(LPVOID threadParam) {
 }
 
 PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
-                  int sample_rate, play_item_t* play_list_head, int buffer_size) {
+                  int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
     win_audio_blob_t* audio_blob;
@@ -119,9 +121,12 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     DWORD thread_id;
     int bytes_per_frame = bytes_per_chan * num_channels;
     WAVEHDR* temp_wave_hdr;
+    int buffer_size;
     int i;
 
     DBG_PLAY_OS_CALL
+
+    buffer_size = get_buffer_size(latency_us / NUM_BUFS, sample_rate, bytes_per_chan);
 
     /* initial allocation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(win_audio_blob_t));
@@ -175,8 +180,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         return NULL;
     }
 
-    /* fill and write two buffers */
-    for (i = 0; i < 2; i++) {
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"allocating %d buffers of %d bytes\n", NUM_BUFS, buffer_size);
+    #endif
+    for (i = 0; i < NUM_BUFS; i++) {
         temp_wave_hdr = PyMem_Malloc(sizeof(WAVEHDR));
         memset(temp_wave_hdr, 0, sizeof(WAVEHDR));
         temp_wave_hdr->lpData = PyMem_Malloc(buffer_size);
