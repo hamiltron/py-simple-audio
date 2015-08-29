@@ -41,7 +41,6 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-
     if (bytes_per_sample < 1 || bytes_per_sample > 2) {
         PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit) or 2 (16-bit).");
         return NULL;

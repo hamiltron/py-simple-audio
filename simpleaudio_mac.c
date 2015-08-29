@@ -84,6 +84,10 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
             audio_blob->num_buffers--;
         }
         if (audio_blob->num_buffers == 0) {
+            #if DEBUG > 1
+            fprintf(DBG_OUT, DBG_PRE"buffers deallocated - stopping queue\n");
+            #endif
+            
             /* all done, cleanup */
             AudioQueueStop(audio_queue, true);
             AudioQueueDispose(audio_queue, true);
