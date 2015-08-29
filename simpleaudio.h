@@ -15,8 +15,6 @@ MIT License (see LICENSE.txt)
 #define SA_CLEAR (0)
 #define SA_STOP (1)
 
-#define SA_BUFFER_INC (256)
-
 #define SA_LATENCY_US (100000)
 
 #define DBG_OUT stdout

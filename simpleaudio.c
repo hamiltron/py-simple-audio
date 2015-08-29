@@ -175,11 +175,5 @@ play_item_t* new_list_item(play_item_t* list_head) {
 /********************************************/
 
 int get_buffer_size(int latency_us, int sample_rate, int frame_size) {
-    int sample_count;
-    int increments;
-    
-    sample_count = (long long)latency_us * sample_rate / 1000000;
-    if (sample_count < 1) { sample_count = 1; }
-    increments = (sample_count * frame_size - 1) / SA_BUFFER_INC + 1;
-    return increments * SA_BUFFER_INC;
+    return (long long)latency_us * sample_rate / 1000000 * frame_size;
 }

@@ -107,7 +107,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     DBG_PLAY_OS_CALL
 
-    buffer_size = get_buffer_size(latency_us / NUM_BUFS, sample_rate, bytes_per_chan);
+    buffer_size = get_buffer_size(latency_us / NUM_BUFS, sample_rate, bytes_per_chan * num_channels);
 
     /* audio blob creation and audio buffer copy */
     audio_blob = PyMem_Malloc(sizeof(mac_audio_blob_t));
