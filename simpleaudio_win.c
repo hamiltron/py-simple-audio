@@ -94,7 +94,8 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
             PyMem_Free(wave_header->lpData);
             PyMem_Free(wave_header);
             audio_blob->num_buffers--;
-        } else {
+        } 
+        if (audio_blob->num_buffers == 0) {
             #if DEBUG > 1
             fprintf(DBG_OUT, DBG_PRE"playback finished - cleaning up\n");
             #endif
