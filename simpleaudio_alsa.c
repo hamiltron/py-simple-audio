@@ -114,7 +114,12 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     snd_pcm_format_t sample_format;
     pthread_t play_thread;
     int result;
-
+    snd_pcm_hw_params_t* hw_params;
+    snd_pcm_uframes_t buffer_frames;
+    
+    /* not sure where the best place to do this is or if it matters */
+    snd_pcm_hw_params_alloca(&hw_params);
+    
     DBG_PLAY_OS_CALL
 
     /* set that format appropriately */
@@ -136,7 +141,6 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->samples_left = len_samples;
     audio_blob->samples_played = 0;
     audio_blob->frame_size = bytes_per_frame;
-    audio_blob->buffer_size = buffer_size;
     
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
@@ -151,7 +155,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         return NULL;
      }
 
-    /* set the PCM params */
+    /* set the PCM params using ALSA's convenience function */
     result = snd_pcm_set_params(audio_blob->handle, sample_format, SND_PCM_ACCESS_RW_INTERLEAVED, 
                                 num_channels, sample_rate, RESAMPLE, latency_us);
     if (result < 0) {
@@ -160,6 +164,29 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         destroy_audio_blob(audio_blob);
         return NULL;
     }
+
+    /* get the HW params (needed for buffer size) */
+    result = snd_pcm_hw_params_current(audio_blob->handle, hw_params);
+    if (result < 0) {
+        ALSA_EXCEPTION("Error getting hardware parameters.", result, snd_strerror(result), err_msg_buf);
+        snd_pcm_close(audio_blob->handle);
+        destroy_audio_blob(audio_blob);
+        return NULL;
+    }
+
+    /* get the buffer size */
+    result = snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_frames);
+    if (result < 0) {
+        ALSA_EXCEPTION("Error getting buffer_size.", result, snd_strerror(result), err_msg_buf);
+        snd_pcm_close(audio_blob->handle);
+        destroy_audio_blob(audio_blob);
+        return NULL;
+    }
+    audio_blob->buffer_size = buffer_frames * bytes_per_chan * num_channels;
+
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"ALSA sayd buffer size is %d bytes\n", audio_blob->buffer_size);
+    #endif
 
     /* fire off the playback thread */
     result = pthread_create(&play_thread, NULL, playback_thread, (void*)audio_blob);

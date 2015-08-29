@@ -22,11 +22,17 @@ MIT License (see LICENSE.txt)
 #define DBG_OUT stdout
 #define DBG_PRE "[dbg] "
 
-/* some handy macros for debug prints used in ultiple places */
+/* some handy macros for debug prints used in multiple places */
 #if DEBUG > 0
     #define DBG_PLAY_OS_CALL \
-        fprintf(DBG_OUT, DBG_PRE"play_os call: buffer at %p, %d samples, %d channels, %d bytes-per-chan, sample rate %d, list head at %p, latency (microseconds) %d\n", \
-                buffer_obj.buf, len_samples, num_channels, bytes_per_chan, sample_rate, play_list_head, latency_us);
+        fprintf(DBG_OUT, DBG_PRE"play_os call: ...\n");\
+        fprintf(DBG_OUT, DBG_PRE" ... audio data at %p\n", buffer_obj.buf);\
+        fprintf(DBG_OUT, DBG_PRE" ... list head at %p\n", play_list_head);\
+        fprintf(DBG_OUT, DBG_PRE" ... %d samples\n", len_samples);\
+        fprintf(DBG_OUT, DBG_PRE" ... %d channels\n", num_channels);\
+        fprintf(DBG_OUT, DBG_PRE" ... %d bytes per channel\n", bytes_per_chan);\
+        fprintf(DBG_OUT, DBG_PRE" ... %d Hz sample rate\n", sample_rate);\
+        fprintf(DBG_OUT, DBG_PRE" ... %d microseconds latency\n", latency_us);
 
     #define DBG_DESTROY_BLOB fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
 
