@@ -152,6 +152,7 @@ static PyMethodDef _simpleaudio_methods[] = {
     {"_play_buffer",  _play_buffer, METH_VARARGS, "Play audio from an object supporting the buffer interface."},
     {"_stop",  _stop, METH_VARARGS, "Stop playback of a specified audio object."},
     {"_stop_all",  _stop_all, METH_NOARGS, "Stop playback of all audio objects."},
+    {"_is_playing",  _is_playing, METH_VARARGS, "Indicate whether the specified audio object is still playing."},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
