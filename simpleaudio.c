@@ -1,6 +1,6 @@
-/* 
+/*
 Simpleaudio Python Extension
-Copyright (C) 2015, Joe Hamilton 
+Copyright (C) 2015, Joe Hamilton
 MIT License (see LICENSE.txt)
 */
 
@@ -16,21 +16,89 @@ play_item_t play_list_head = {
     NULL       /* mutex */
 };
 
+static PyObject* _stop(PyObject *self, PyObject *args)
+{
+    play_id_t play_id;
+    play_item_t* list_item = play_list_head.next_item;
 
-static PyObject* play_buffer(PyObject *self, PyObject *args)
+    if (!PyArg_ParseTuple(args, "K", &play_id)) {
+        return NULL;
+    }
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            grab_mutex(list_item->mutex);
+            list_item->stop_flag = SA_STOP;
+            release_mutex(list_item->mutex);
+            break;
+        }
+        list_item = list_item->next_item;
+    }
+    release_mutex(play_list_head.mutex);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* _stop_all(PyObject *self, PyObject *args)
+{
+    play_item_t* list_item = play_list_head.next_item;
+
+    /* walk the list and set all audio to stop */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        grab_mutex(list_item->mutex);
+        list_item->stop_flag = SA_STOP;
+        release_mutex(list_item->mutex);
+        list_item = list_item->next_item;
+    }
+    release_mutex(play_list_head.mutex);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* _is_playing(PyObject *self, PyObject *args)
+{
+    play_id_t play_id;
+    play_item_t* list_item = play_list_head.next_item;
+    int found = 0;
+
+    if (!PyArg_ParseTuple(args, "K", &play_id)) {
+        return NULL;
+    }
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            found = 1;
+        }
+        list_item = list_item->next_item;
+    }
+    release_mutex(play_list_head.mutex);
+
+    if (found) {
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
+}
+
+static PyObject* _play_buffer(PyObject *self, PyObject *args)
 {
     PyObject* audio_obj;
     Py_buffer buffer_obj;
     int num_channels;
-    int bytes_per_sample;
+    int bytes_per_channel;
     int sample_rate;
     int num_samples;
-    
+
     #if DEBUG > 0
     fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
     #endif
 
-    if (!PyArg_ParseTuple(args, "OIII", &audio_obj, &num_channels, &bytes_per_sample, &sample_rate)) {
+    if (!PyArg_ParseTuple(args, "Oiii", &audio_obj, &num_channels, &bytes_per_channel, &sample_rate)) {
         return NULL;
     }
 
@@ -41,7 +109,7 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (bytes_per_sample < 1 || bytes_per_sample > 2) {
+    if (bytes_per_channel < 1 || bytes_per_channel > 2) {
         PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit) or 2 (16-bit).");
         return NULL;
     }
@@ -61,15 +129,15 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
             sample_rate != 88200 &&
             sample_rate != 96000 &&
             sample_rate != 192000) {
-        PyErr_SetString(PyExc_ValueError, "Sample rate must be a standard sample rate.");
+        PyErr_SetString(PyExc_ValueError, "Weird sample rates are not supported.");
         return NULL;
     }
 
-    if (buffer_obj.len % (bytes_per_sample * num_channels) != 0) {
+    if (buffer_obj.len % (bytes_per_channel * num_channels) != 0) {
         PyErr_SetString(PyExc_ValueError, "Buffer size (in bytes) is not a multiple of bytes-per-sample and the number of channels.");
         return NULL;
     }
-    num_samples = buffer_obj.len / bytes_per_sample / num_channels;
+    num_samples = buffer_obj.len / bytes_per_channel / num_channels;
 
     /* explicitly tell Python we're using threading since the
        it requires a cross-thread API call to release the buffer
@@ -77,11 +145,13 @@ static PyObject* play_buffer(PyObject *self, PyObject *args)
     PyEval_InitThreads();
 
     /* fixed 100ms latency */
-    return play_os(buffer_obj, num_samples, num_channels, bytes_per_sample, sample_rate, &play_list_head, SA_LATENCY_US);
+    return play_os(buffer_obj, num_samples, num_channels, bytes_per_channel, sample_rate, &play_list_head, SA_LATENCY_US);
 }
 
 static PyMethodDef _simpleaudio_methods[] = {
-    {"play_buffer",  play_buffer, METH_VARARGS, "Play audio from an object supporting the buffer interface."},
+    {"_play_buffer",  _play_buffer, METH_VARARGS, "Play audio from an object supporting the buffer interface."},
+    {"_stop",  _stop, METH_VARARGS, "Stop playback of a specified audio object."},
+    {"_stop_all",  _stop_all, METH_NOARGS, "Stop playback of all audio objects."},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
@@ -119,14 +189,6 @@ PyInit__simpleaudio(void)
     return m;
 }
 
-/* shorter version of init function
-PyMODINIT_FUNC
-PyInit_spam(void)
-{
-    return PyModule_Create(&spammodule);
-}
-*/
-
 /*********************************************/
 
 void delete_list_item(play_item_t* play_item) {
@@ -147,28 +209,28 @@ void delete_list_item(play_item_t* play_item) {
 /*********************************************/
 
 play_item_t* new_list_item(play_item_t* list_head) {
-    play_item_t* newItem;
-    play_item_t* oldTail;
+    play_item_t* new_item;
+    play_item_t* old_tail;
 
-    newItem = PyMem_Malloc(sizeof(play_item_t));
-    newItem->next_item = NULL;
+    new_item = PyMem_Malloc(sizeof(play_item_t));
+    new_item->next_item = NULL;
 
-    oldTail = list_head;
-    while(oldTail->next_item != NULL) {
-        oldTail = oldTail->next_item;
+    old_tail = list_head;
+    while(old_tail->next_item != NULL) {
+        old_tail = old_tail->next_item;
     }
-    oldTail->next_item = newItem;
+    old_tail->next_item = new_item;
 
-    newItem->prev_item = oldTail;
-    newItem->mutex = create_mutex();
-    newItem->play_id = (list_head->play_id)++;
-    newItem->stop_flag = SA_CLEAR;
+    new_item->prev_item = old_tail;
+    new_item->mutex = create_mutex();
+    new_item->play_id = (list_head->play_id)++;
+    new_item->stop_flag = SA_CLEAR;
 
     #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", newItem, newItem->play_id, oldTail);
+    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", new_item, new_item->play_id, old_tail);
     #endif
 
-    return newItem;
+    return new_item;
 }
 
 /********************************************/
