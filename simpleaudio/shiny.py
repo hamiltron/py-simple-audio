@@ -23,11 +23,12 @@ def stop_all():
     _sa._stop_all()
 
 def play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate):
-    return _sa._play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate)
+    play_id = _sa._play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate)
+    return PlayObject(play_id)
 
 def play_wave_read(wave_read):
-    n_chan = wave_read.getnchannels()
-    samp_rate = wave_read.getframerate()
-    samp_count = wave_read.getnframes()
-    audio_data = wave_read.readframes(samp_count)
-    return play_buffer(audio_data, wave_read.getnchannels(), wave_read.getsampwidth(), wave_read.getframerate())
+    wave_params = get_wave_params(wave_read)
+    return play_buffer(*wave_params)
+
+def get_wave_params(wave_read):
+    return (wave_read.readframes(wave_read.getnframes()), wave_read.getnchannels(), wave_read.getsampwidth(), wave_read.getframerate())
