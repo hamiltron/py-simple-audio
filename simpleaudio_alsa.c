@@ -17,9 +17,11 @@ MIT License (see LICENSE.txt)
 
 
 void* playback_thread(void* thread_param) {
-    alsa_audio_blob_t* audio_blob = (alsa_audio_blob_t*)thread_param;
+    audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
     void* audio_ptr;
     int play_samples;
+    int samples_left = (audio_blob->len_bytes - audio_blob->used_bytes) / audio_blob->frame_size;
+    int buffer_samples = audio_blob->buffer_size / audio_blob->frame_size;
     int result;
     int stop_flag = 0;
 
@@ -27,7 +29,7 @@ void* playback_thread(void* thread_param) {
     fprintf(DBG_OUT, DBG_PRE"playback thread started with audio blob at %p\n", thread_param);
     #endif
 
-    while (audio_blob->samples_left > 0 && !stop_flag) {
+    while (samples_left > 0 && !stop_flag) {
         grab_mutex(audio_blob->play_list_item->mutex);
         stop_flag = audio_blob->play_list_item->stop_flag;
         release_mutex(audio_blob->play_list_item->mutex);
@@ -36,12 +38,12 @@ void* playback_thread(void* thread_param) {
         fprintf(DBG_OUT, DBG_PRE"loop iteration with stop flag: %d\n", stop_flag);
         #endif
 
-        if (audio_blob->samples_left < audio_blob->buffer_size / audio_blob->frame_size) {
-            play_samples = audio_blob->samples_left;
+        if (samples_left < audio_blob->buffer_size) {
+            play_samples = samples_left;
         } else {
-            play_samples = audio_blob->buffer_size / audio_blob->frame_size;
+            play_samples = buffer_samples;
         }
-        audio_ptr = audio_blob->buffer_obj.buf + (size_t)(audio_blob->samples_played * audio_blob->frame_size);
+        audio_ptr = audio_blob->buffer_obj.buf + (size_t)(audio_blob->used_bytes);
         result = snd_pcm_writei(audio_blob->handle, audio_ptr, play_samples);
         if (result < 0) {
             #if DEBUG > 1
@@ -58,8 +60,7 @@ void* playback_thread(void* thread_param) {
                 break;
             }
         } else {
-            audio_blob->samples_played += result;
-            audio_blob->samples_left -= result;
+            audio_blob->used_bytes += result * audio_blob->frame_size;
         }
     }
 
@@ -81,7 +82,7 @@ void* playback_thread(void* thread_param) {
 PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
                   int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
-    alsa_audio_blob_t* audio_blob;
+    audio_blob_t* audio_blob;
     int bytes_per_frame = bytes_per_chan * num_channels;
     static char *device = "default";
     snd_pcm_format_t sample_format;
@@ -96,7 +97,9 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     DBG_PLAY_OS_CALL
 
     /* set that format appropriately */
-    if (bytes_per_chan == 2) {
+    if (bytes_per_chan == 1) {
+            
+    } else if (bytes_per_chan == 2) {
         sample_format = SND_PCM_FORMAT_S16_LE;
     } else {
         ALSA_EXCEPTION("Unsupported Sample Format.", 0, "", err_msg_buf);
@@ -104,15 +107,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
 
     /* audio blob initial allocation and audio buffer copy */
-    audio_blob = PyMem_Malloc(sizeof(alsa_audio_blob_t));
-
-    DBG_CREATE_BLOB
-
+    audio_blob = create_audio_blob();
     audio_blob->buffer_obj = buffer_obj;
     audio_blob->list_mutex = play_list_head->mutex;
-    audio_blob->handle = NULL;
-    audio_blob->samples_left = len_samples;
-    audio_blob->samples_played = 0;
+    audio_blob->len_bytes = len_samples * bytes_per_frame;
     audio_blob->frame_size = bytes_per_frame;
     
     /* setup the linked list item for this playback buffer */
@@ -121,7 +119,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     release_mutex(play_list_head->mutex);
 
     /* open access to a PCM device (blocking mode)  */
-    result = snd_pcm_open(&audio_blob->handle, device, SND_PCM_STREAM_PLAYBACK, 0);
+    result = snd_pcm_open((snd_pcm_t**)&audio_blob->handle, device, SND_PCM_STREAM_PLAYBACK, 0);
     if (result < 0) {
         ALSA_EXCEPTION("Error opening PCM device.", result, snd_strerror(result), err_msg_buf);
         destroy_audio_blob(audio_blob);
