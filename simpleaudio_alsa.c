@@ -62,6 +62,8 @@ void* playback_thread(void* thread_param) {
         } else {
             audio_blob->used_bytes += result * audio_blob->frame_size;
         }
+        
+        samples_left = (audio_blob->len_bytes - audio_blob->used_bytes) / audio_blob->frame_size;
     }
 
     #if DEBUG > 1
