@@ -15,33 +15,6 @@ MIT License (see LICENSE.txt)
 
 #define RESAMPLE (1)
 
-typedef struct {
-    Py_buffer buffer_obj;
-    snd_pcm_t* handle;
-    int samples_left;
-    int samples_played;
-    int frame_size;
-    int buffer_size;
-    play_item_t* play_list_item;
-    void* list_mutex;
-} alsa_audio_blob_t;
-
-void destroy_audio_blob(alsa_audio_blob_t* audio_blob) {
-    PyGILState_STATE gstate;
-    
-    DBG_DESTROY_BLOB
-
-    /* release the buffer view so Python can
-       decrement it's refernce count*/
-    gstate = PyGILState_Ensure();
-    PyBuffer_Release(&audio_blob->buffer_obj);
-    PyGILState_Release(gstate);
-
-    grab_mutex(audio_blob->list_mutex);
-    delete_list_item(audio_blob->play_list_item);
-    release_mutex(audio_blob->list_mutex);
-    PyMem_Free(audio_blob);
-}
 
 void* playback_thread(void* thread_param) {
     alsa_audio_blob_t* audio_blob = (alsa_audio_blob_t*)thread_param;

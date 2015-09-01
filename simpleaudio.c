@@ -239,3 +239,38 @@ play_item_t* new_list_item(play_item_t* list_head) {
 int get_buffer_size(int latency_us, int sample_rate, int frame_size) {
     return (long long)latency_us * sample_rate / 1000000 * frame_size;
 }
+
+/********************************************/
+
+void destroy_audio_blob(audio_blob_t* audio_blob) {
+    PyGILState_STATE gstate;
+    
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
+    #endif
+
+    /* release the buffer view so Python can
+       decrement it's reference count*/
+    gstate = PyGILState_Ensure();
+    PyBuffer_Release(&audio_blob->buffer_obj);
+    PyGILState_Release(gstate);
+
+    grab_mutex(audio_blob->list_mutex);
+    delete_list_item(audio_blob->play_list_item);
+    release_mutex(audio_blob->list_mutex);
+    PyMem_Free(audio_blob);
+}
+
+/********************************************/
+
+audio_blob_t* create_audio_blob() {
+    audio_blob_t* audio_blob = PyMem_Malloc(sizeof(audio_blob_t));
+    
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
+    #endif
+    
+    memset(audio_blob, 0, sizeof(audio_blob_t));
+    
+    return audio_blob;
+}

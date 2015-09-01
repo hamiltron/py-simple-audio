@@ -61,6 +61,18 @@ typedef struct play_item_s {
     void* mutex;
 } play_item_t;
 
+typedef struct {
+    Py_buffer buffer_obj;
+    void* handle;
+    int used_bytes;
+    int len_bytes;
+    int num_buffers;
+    int frame_size;
+    int buffer_size;
+    play_item_t* play_list_item;
+    void* list_mutex;
+} audio_blob_t;
+
 extern PyObject* sa_python_error;
 
 /* prototypes */
@@ -68,6 +80,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
 void delete_list_item(play_item_t* play_item);
 play_item_t* new_list_item(play_item_t* list_head);
+
+void destroy_audio_blob(audio_blob_t* audio_blob);
+audio_blob_t* create_audio_blob(void);
+
 int get_buffer_size(int latency_us, int sample_rate, int frame_size);
 
 void* create_mutex(void);

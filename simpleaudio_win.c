@@ -23,34 +23,8 @@ enum {
     FILL_BUFFER_DONE = 2
 };
 
-typedef struct {
-    Py_buffer buffer_obj;
-    HWAVEOUT wave_out_hdr;
-    int used_bytes;
-    int len_bytes;
-    int num_buffers;
-    play_item_t* play_list_item;
-    void* list_mutex;
-} win_audio_blob_t;
 
-void destroy_audio_blob(win_audio_blob_t* audio_blob) {
-    PyGILState_STATE gstate;
-
-    DBG_DESTROY_BLOB
-
-    /* release the buffer view so Python can
-       decrement it's refernce count*/
-    gstate = PyGILState_Ensure();
-    PyBuffer_Release(&audio_blob->buffer_obj);
-    PyGILState_Release(gstate);
-
-    grab_mutex(audio_blob->list_mutex);
-    delete_list_item(audio_blob->play_list_item);
-    release_mutex(audio_blob->list_mutex);
-    PyMem_Free(audio_blob);
-}
-
-MMRESULT fill_buffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
+MMRESULT fill_buffer(WAVEHDR* wave_header, audio_blob_t* audio_blob) {
     int want = wave_header->dwBufferLength;
     int have = audio_blob->len_bytes - audio_blob->used_bytes;
     int stop_flag = 0;
@@ -75,12 +49,12 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
         #endif
         
         if (have > want) {have = want;}
-        result = waveOutUnprepareHeader(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
+        result = waveOutUnprepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
         if (result != MMSYSERR_NOERROR) {return result;}
         memcpy(wave_header->lpData, &((char*)audio_blob->buffer_obj.buf)[audio_blob->used_bytes], have);
-        result = waveOutPrepareHeader(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
+        result = waveOutPrepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
         if (result != MMSYSERR_NOERROR) {return result;}
-        result = waveOutWrite(audio_blob->wave_out_hdr, wave_header, sizeof(WAVEHDR));
+        result = waveOutWrite(audio_blob->handle, wave_header, sizeof(WAVEHDR));
         if (result != MMSYSERR_NOERROR) {return result;}
         wave_header->dwBufferLength = have;
         audio_blob->used_bytes += have;
@@ -101,7 +75,7 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
             #endif
             
             /* all done, cleanup */
-            waveOutClose(audio_blob->wave_out_hdr);
+            waveOutClose(audio_blob->handle);
             destroy_audio_blob(audio_blob);
             /* admitted, this is terrible */
             return MMSYSERR_NOERROR - 1;
@@ -112,7 +86,7 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, win_audio_blob_t* audio_blob) {
 }
 
 DWORD WINAPI bufferThread(LPVOID thread_param) {
-    win_audio_blob_t* audio_blob = (win_audio_blob_t*)thread_param;
+    audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
     MSG message;
     WAVEHDR* wave_header;
     MMRESULT result;
@@ -155,7 +129,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
                   int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
-    win_audio_blob_t* audio_blob;
+    audio_blob_t* audio_blob;
     WAVEFORMATEX audio_format;
     MMRESULT result;
     HANDLE thread_handle = NULL;
@@ -169,17 +143,12 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     buffer_size = get_buffer_size(latency_us / NUM_BUFS, sample_rate, bytes_per_chan * num_channels);
 
-    /* initial allocation and audio buffer copy */
-    audio_blob = PyMem_Malloc(sizeof(win_audio_blob_t));
-
-    DBG_CREATE_BLOB
-
+    audio_blob = create_audio_blob();
     audio_blob->buffer_obj = buffer_obj;
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytes_per_frame;
-    audio_blob->used_bytes = 0;
-    audio_blob->num_buffers = 0;
-
+    audio_blob->num_buffers = NUM_BUFS;
+        
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
     audio_blob->play_list_item = new_list_item(play_list_head);
@@ -211,7 +180,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
 
     /* open a handle to the default audio device */
-    result = waveOutOpen(&audio_blob->wave_out_hdr, WAVE_MAPPER, &audio_format, thread_id, 0, CALLBACK_THREAD);
+    result = waveOutOpen((HWAVEOUT*)&audio_blob->handle, WAVE_MAPPER, &audio_format, thread_id, 0, CALLBACK_THREAD);
     if (result != MMSYSERR_NOERROR) {
         waveOutGetErrorText(result, sys_msg_buf, SYS_STR_LEN);
         WIN_EXCEPTION("Failed to open audio device.", result, sys_msg_buf, err_msg_buf);
@@ -236,13 +205,11 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
             WIN_EXCEPTION("Failed to buffer audio.", result, sys_msg_buf, err_msg_buf);
 
             PostThreadMessage(thread_id, WM_QUIT, 0, 0);
-            waveOutUnprepareHeader(audio_blob->wave_out_hdr, temp_wave_hdr, sizeof(WAVEHDR));
-            waveOutClose(audio_blob->wave_out_hdr);
+            waveOutUnprepareHeader(audio_blob->handle, temp_wave_hdr, sizeof(WAVEHDR));
+            waveOutClose(audio_blob->handle);
             destroy_audio_blob(audio_blob);
             return NULL;
         }
-
-        audio_blob->num_buffers++;
     }
 
     return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
