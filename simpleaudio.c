@@ -21,14 +21,26 @@ static PyObject* _stop(PyObject *self, PyObject *args)
     play_id_t play_id;
     play_item_t* list_item = play_list_head.next_item;
 
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"_stop call\n");
+    #endif
+
     if (!PyArg_ParseTuple(args, "K", &play_id)) {
         return NULL;
     }
+
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"looking for play ID %llu\n", play_id);
+    #endif
 
     /* walk the list and find the matching play ID */
     grab_mutex(play_list_head.mutex);
     while(list_item != NULL) {
         if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+            
             grab_mutex(list_item->mutex);
             list_item->stop_flag = SA_STOP;
             release_mutex(list_item->mutex);
@@ -45,9 +57,17 @@ static PyObject* _stop_all(PyObject *self, PyObject *args)
 {
     play_item_t* list_item = play_list_head.next_item;
 
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"_stop_all call\n");
+    #endif
+
     /* walk the list and set all audio to stop */
     grab_mutex(play_list_head.mutex);
     while(list_item != NULL) {
+        #if DEBUG > 0
+        fprintf(DBG_OUT, DBG_PRE"stopping ID %llu in list item at %p\n", list_item->play_id, list_item);
+        #endif
+        
         grab_mutex(list_item->mutex);
         list_item->stop_flag = SA_STOP;
         release_mutex(list_item->mutex);
@@ -64,14 +84,26 @@ static PyObject* _is_playing(PyObject *self, PyObject *args)
     play_item_t* list_item = play_list_head.next_item;
     int found = 0;
 
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"_is_playing call\n");
+    #endif
+
     if (!PyArg_ParseTuple(args, "K", &play_id)) {
         return NULL;
     }
+
+    #if DEBUG > 0
+    fprintf(DBG_OUT, DBG_PRE"looking for play ID %llu\n", play_id);
+    #endif
 
     /* walk the list and find the matching play ID */
     grab_mutex(play_list_head.mutex);
     while(list_item != NULL) {
         if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+            
             found = 1;
         }
         list_item = list_item->next_item;
@@ -95,7 +127,7 @@ static PyObject* _play_buffer(PyObject *self, PyObject *args)
     int num_samples;
 
     #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"play_buffer call\n");
+    fprintf(DBG_OUT, DBG_PRE"_play_buffer call\n");
     #endif
 
     if (!PyArg_ParseTuple(args, "Oiii", &audio_obj, &num_channels, &bytes_per_channel, &sample_rate)) {
