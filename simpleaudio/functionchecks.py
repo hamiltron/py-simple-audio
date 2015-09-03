@@ -5,21 +5,19 @@ import unittest
 import os
 from time import sleep
 
+AUDIO_DIR = "test_audio"
+
 def _gwp(wave_file):
-    with wave.open(os.path.join(AUDIO_DIR, file), 'rb') as wave_read:
+    with wave.open(os.path.join(AUDIO_DIR, wave_file), 'rb') as wave_read:
         return sa.get_wave_params(wave_read)
 
-def run_all_checks(countdown=3):
+def run_all(countdown=3):
     checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck, 
               StopCheck, StopAllCheck, IsPlayingCheck]
     for check in checks:
         check.run(countdown)
 
 class FunctionCheckBase(object):
-    @classmethod
-    def get_description(cls):
-        return ""
-        
     @classmethod
     def check(cls):
         raise NotImplementedError()
@@ -29,26 +27,24 @@ class FunctionCheckBase(object):
         # print function check header
         print("")
         print("=" * 80)
-        print(cls.__name__)
-        print("")
-        print(cls.get_description())
+        print("--", cls.__name__, "--")
+        print(cls.__doc__.strip())
         print("=" * 80)
         
         if countdown > 0:
             print("Starting check in ...")
-            for tick in reversed(range(1, countdown + 1))
+            for tick in reversed(range(1, countdown + 1)):
                 print(tick, "...")
+                sleep(1)
         print("RUNNING CHECK ...")
         cls.check()
         print("... DONE")
         
 
 class LeftRightCheck(FunctionCheckBase):
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks stereo playback by ...
-               """
+    """
+    This checks stereo playback by ...
+    """
         
     @classmethod
     def check(cls):
@@ -57,11 +53,9 @@ class LeftRightCheck(FunctionCheckBase):
         sleep(4)
         
 class OverlappingCheck(FunctionCheckBase):
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks overlapped playback by ...
-               """
+    """
+    This checks overlapped playback by ...
+    """
         
     @classmethod
     def check(cls):
@@ -74,15 +68,13 @@ class OverlappingCheck(FunctionCheckBase):
         sleep(4)
     
 class RatesAndChannelsCheck(FunctionCheckBase):
+    """
+    This checks placback of mono and stereo audio at all allowed sample rates.
+    """
+    
     waves = [("butts_2_16_32.wav", 2, 32000),
              ("butts_2_16_44.wav", 2, 44100),
              ("butts_2_16_48.wav", 2, 48000)]
-    
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks placback of mono and stereo audio at all allowed sample rates.
-               """
         
     @classmethod
     def check(cls):
@@ -95,11 +87,9 @@ class RatesAndChannelsCheck(FunctionCheckBase):
                 print("Error:", e.message)
 
 class StopCheck(FunctionCheckBase):
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks stopping playback by ...
-               """
+    """
+    This checks stopping playback by ...
+    """
         
     @classmethod
     def check(cls):
@@ -115,11 +105,9 @@ class StopCheck(FunctionCheckBase):
         sleep(3.5)
     
 class StopAllCheck(FunctionCheckBase):
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks stopping playback of all audio by ...
-               """
+    """
+    This checks stopping playback of all audio by ...
+    """
         
     @classmethod
     def check(cls):
@@ -134,11 +122,9 @@ class StopAllCheck(FunctionCheckBase):
         sleep(3.5)
 
 class IsPlayingCheck(FunctionCheckBase):
-    @classmethod
-    def get_description(cls):
-        return """
-               This checks stopping playback of all audio by ...
-               """
+    """
+    This checks stopping playback of all audio by ...
+    """
         
     @classmethod
     def check(cls):

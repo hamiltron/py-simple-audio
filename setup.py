@@ -47,6 +47,6 @@ setup(
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4'],
     test_suite="tests",
-    py_modules = ["simpleaudio.shiny"],
+    py_modules = ["simpleaudio.shiny", "simpleaudio.functionchecks"],
     ext_modules = [simpleaudio_c_ext])
 
