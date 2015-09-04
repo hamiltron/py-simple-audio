@@ -1,5 +1,5 @@
 # Simpleaudio Python Extension
-# Copyright (C) 2015, Joe Hamilton 
+# Copyright (C) 2015, Joe Hamilton
 # MIT License (see LICENSE.txt)
 
 from setuptools import setup, Extension
@@ -36,13 +36,11 @@ setup(
     packages = ['simpleaudio'],
     version = VERSION,
     license='MIT',
-    description = """The simpleaudio package contains the simpleaudio module
-                     which makes playing wave audio in Python very simple.""",
+    description = "The simpleaudio module which makes playing wave audio in Python very simple.",
     author = 'Joe Hamilton',
     author_email = 'jhamilton10@georgefox.edu',
-    url = 'https://github.com/hamiltron/simpleaudio', 
-    download_url = 'https://github.com/hamiltron/simpleaudio/tarball/'+VERSION, 
-    keywords = ['audio', 'wave', 'media', 'multimedia', 'sound', 'alsa', 'coreaudio', 'winmm', 'music'], 
+    url = 'https://github.com/hamiltron/simpleaudio',
+    keywords = ['audio', 'wave', 'media', 'multimedia', 'sound', 'alsa', 'coreaudio', 'winmm', 'music'],
     classifiers = ['License :: OSI Approved :: MIT License',
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4'],
