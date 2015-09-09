@@ -43,7 +43,9 @@ class FunctionCheckBase(object):
 
 class LeftRightCheck(FunctionCheckBase):
     """
-    This checks stereo playback by ...
+    This checks stereo playback by first playing a note
+    in the left channel only, then a different note in the 
+    right channel only. 
     """
 
     @classmethod
@@ -54,7 +56,8 @@ class LeftRightCheck(FunctionCheckBase):
 
 class OverlappingCheck(FunctionCheckBase):
     """
-    This checks overlapped playback by ...
+    This checks overlapped playback by playing three different notes
+    spaced approximately a half-second apart but still overlapping. 
     """
 
     @classmethod
@@ -90,7 +93,9 @@ class RatesAndChannelsCheck(FunctionCheckBase):
 
 class StopCheck(FunctionCheckBase):
     """
-    This checks stopping playback by ...
+    This checks stopping playback by playing three different 
+    notes simultaneously and stopping two after approximately a half-second,
+    leaving only one note playing for two more seconds. 
     """
 
     @classmethod
@@ -101,14 +106,16 @@ class StopCheck(FunctionCheckBase):
         play_1 = sa.play_buffer(*wave_1)
         play_2 = sa.play_buffer(*wave_2)
         play_3 = sa.play_buffer(*wave_3)
-        sleep(0.25)
+        sleep(0.5)
         play_1.stop()
         play_3.stop()
         sleep(3)
 
 class StopAllCheck(FunctionCheckBase):
     """
-    This checks stopping playback of all audio by ...
+    This checks stopping playback of all audio by playing three different
+    notes simultaneously and stopping all of them after approximately 
+    a half-second. 
     """
 
     @classmethod
@@ -125,7 +132,10 @@ class StopAllCheck(FunctionCheckBase):
 
 class IsPlayingCheck(FunctionCheckBase):
     """
-    This checks stopping playback of all audio by ...
+    This checks functionality of the is_playing() method by 
+    calling during playback (when it should return True) 
+    and calling it again after all playback has stopped
+    (when it should return False). The output is printed. 
     """
 
     @classmethod
