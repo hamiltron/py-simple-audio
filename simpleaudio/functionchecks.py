@@ -1,15 +1,12 @@
 import simpleaudio as sa
 
-import wave
-import unittest
 import os
 from time import sleep
 
 AUDIO_DIR = "test_audio"
 
-def _gwp(wave_file):
-    with wave.open(os.path.join(AUDIO_DIR, wave_file), 'rb') as wave_read:
-        return sa.get_wave_params(wave_read)
+def _gwo(wave_obj_file):
+    return sa.WaveObject.from_wave_file(os.path.join(AUDIO_DIR, wave_obj_file))
 
 def run_all(countdown=3):
     checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
@@ -50,8 +47,8 @@ class LeftRightCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave = _gwp("left_right.wav")
-        sa.play_buffer(*wave)
+        wave_obj = _gwo("left_right.wav")
+        wave_obj.play()
         sleep(4)
 
 class OverlappingCheck(FunctionCheckBase):
@@ -62,14 +59,14 @@ class OverlappingCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave_1 = _gwp("c.wav")
-        wave_2 = _gwp("e.wav")
-        wave_3 = _gwp("g.wav")
-        sa.play_buffer(*wave_1)
+        wave_obj_1 = _gwo("c.wav")
+        wave_obj_2 = _gwo("e.wav")
+        wave_obj_3 = _gwo("g.wav")
+        wave_obj_1.play()
         sleep(0.5)
-        sa.play_buffer(*wave_2)
+        wave_obj_2.play()
         sleep(0.5)
-        sa.play_buffer(*wave_3)
+        wave_obj_3.play()
         sleep(3)
 
 class RatesAndChannelsCheck(FunctionCheckBase):
@@ -77,16 +74,16 @@ class RatesAndChannelsCheck(FunctionCheckBase):
     This checks placback of mono and stereo audio at all allowed sample rates and bit-depths.
     """
 
-    waves = [("notes_2_16_32.wav", 2, 32000),
-             ("notes_2_16_44.wav", 2, 44100),
-             ("notes_2_16_48.wav", 2, 48000)]
+    wave_files = ["notes_2_16_32.wav",
+                  "notes_2_16_44.wav",
+                  "notes_2_16_48.wav"]
 
     @classmethod
     def check(cls):
-        for wave_file, num_chan, sample_rate in cls.waves:
-            wave = _gwp(wave_file)
+        for wave_file in cls.wave_files:
+            wave_obj = _gwo(wave_file)
             try:
-                sa.play_buffer(*wave)
+                wave_obj.play()
                 sleep(4)
             except Exception as e:
                 print("Error:", e.message)
@@ -100,15 +97,15 @@ class StopCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave_1 = _gwp("c.wav")
-        wave_2 = _gwp("e.wav")
-        wave_3 = _gwp("g.wav")
-        play_1 = sa.play_buffer(*wave_1)
-        play_2 = sa.play_buffer(*wave_2)
-        play_3 = sa.play_buffer(*wave_3)
+        wave_obj_1 = _gwo("c.wav")
+        wave_obj_2 = _gwo("e.wav")
+        wave_obj_3 = _gwo("g.wav")
+        play_obj_1 = wave_obj_1.play()
+        wave_obj_2.play()
+        play_obj_3 = wave_obj_3.play()
         sleep(0.5)
-        play_1.stop()
-        play_3.stop()
+        play_obj_1.stop()
+        play_obj_3.stop()
         sleep(3)
 
 class StopAllCheck(FunctionCheckBase):
@@ -120,12 +117,12 @@ class StopAllCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave_1 = _gwp("c.wav")
-        wave_2 = _gwp("e.wav")
-        wave_3 = _gwp("g.wav")
-        sa.play_buffer(*wave_1)
-        sa.play_buffer(*wave_2)
-        sa.play_buffer(*wave_3)
+        wave_obj_1 = _gwo("c.wav")
+        wave_obj_2 = _gwo("e.wav")
+        wave_obj_3 = _gwo("g.wav")
+        wave_obj_1.play()
+        wave_obj_2.play()
+        wave_obj_3.play()
         sleep(0.5)
         sa.stop_all()
         sleep(3)
@@ -140,12 +137,12 @@ class IsPlayingCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave = _gwp("notes_2_16_44.wav")
-        play = sa.play_buffer(*wave)
+        wave_obj = _gwo("notes_2_16_44.wav")
+        play_obj = wave_obj.play()
         sleep(0.5)
-        print("Is playing:", play.is_playing())
+        print("Is playing:", play_obj.is_playing())
         sleep(4)
-        print("Is playing:", play.is_playing())
+        print("Is playing:", play_obj.is_playing())
 
 class WaitDoneCheck(FunctionCheckBase):
     """
@@ -156,7 +153,7 @@ class WaitDoneCheck(FunctionCheckBase):
 
     @classmethod
     def check(cls):
-        wave = _gwp("notes_2_16_44.wav")
-        play = sa.play_buffer(*wave)
-        play.wait_done()
-        play.stop()
+        wave_obj = _gwo("notes_2_16_44.wav")
+        play_obj = wave_obj.play()
+        play_obj.wait_done()
+        play_obj.stop()

@@ -7,7 +7,7 @@ import unittest
 class TestSimpleaudio(unittest.TestCase):
         
     def test_function_checks(self):
-        fc.run_all()
+        fc.run_all(0)
         
     def test_num_channels(self):
         self.assertRaises(ValueError, sa.play_buffer, b'\0'*16, 0, 2, 44100)
