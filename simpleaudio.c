@@ -155,6 +155,7 @@ static PyObject* _play_buffer(PyObject *self, PyObject *args)
             sample_rate != 11025 &&
             sample_rate != 16000 &&
             sample_rate != 22050 &&
+            sample_rate != 24000 &&
             sample_rate != 32000 &&
             sample_rate != 44100 &&
             sample_rate != 48000 &&

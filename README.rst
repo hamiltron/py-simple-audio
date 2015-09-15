@@ -50,6 +50,7 @@ Installation
 ============
 
 Installation should hopefully be as simple as 
+
 ::
 
 pip3 install simpleaudio
@@ -64,10 +65,15 @@ run the installation command above.
 
 LIST TODO
 
-Examples
+Simple Example
 ========
 
-TODO
+::
+
+import simpleaudio as sa
+wave_obj = sa.WaveObject.from_wave_file("my_wave.wav")
+play_obj = wave_obj.play()
+play_obj.wait_done()
 
 Documentation
 =============

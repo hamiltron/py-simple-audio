@@ -2,11 +2,21 @@ import simpleaudio as sa
 
 import os
 from time import sleep
+import re
 
 AUDIO_DIR = "test_audio"
 
 def _gwo(wave_obj_file):
     return sa.WaveObject.from_wave_file(os.path.join(AUDIO_DIR, wave_obj_file))
+
+def _get_rates_and_channels():
+    file_list = []
+    for root, dirs, files in os.walk(AUDIO_DIR):
+        for name in files:
+            if re.match(r'notes_.*', name):
+                file_list.append(name)
+                print(name)
+    return file_list
 
 def run_all(countdown=3):
     checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
@@ -71,18 +81,15 @@ class OverlappingCheck(FunctionCheckBase):
 
 class RatesAndChannelsCheck(FunctionCheckBase):
     """
-    This checks placback of mono and stereo audio at all allowed sample rates and bit-depths.
+    This checks placback of mono and stereo audio at a subset of allowed sample rates and bit-depths.
     """
-
-    wave_files = ["notes_2_16_32.wav",
-                  "notes_2_16_44.wav",
-                  "notes_2_16_48.wav"]
 
     @classmethod
     def check(cls):
-        for wave_file in cls.wave_files:
+        for wave_file in  _get_rates_and_channels():
             wave_obj = _gwo(wave_file)
             try:
+                print(wave_obj)
                 wave_obj.play()
                 sleep(4)
             except Exception as e:
