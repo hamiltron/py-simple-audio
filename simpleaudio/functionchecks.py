@@ -89,7 +89,7 @@ class RatesAndChannelsCheck(FunctionCheckBase):
         for wave_file in  _get_rates_and_channels():
             wave_obj = _gwo(wave_file)
             try:
-                print(wave_obj)
+                print("Playing ", wave_obj)
                 wave_obj.play()
                 sleep(4)
             except Exception as e:
