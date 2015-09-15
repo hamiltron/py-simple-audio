@@ -81,7 +81,7 @@ class OverlappingCheck(FunctionCheckBase):
 
 class RatesAndChannelsCheck(FunctionCheckBase):
     """
-    This checks placback of mono and stereo audio at a subset of allowed sample rates and bit-depths.
+    This checks playback of mono and stereo audio at a subset of allowed sample rates and bit-depths.
     """
 
     @classmethod

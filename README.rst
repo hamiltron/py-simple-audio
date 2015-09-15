@@ -24,28 +24,6 @@ Platforms
 
 - Linux: should work on any disto with a successful build against ALSA (see installation notes below)
 
-Audio Formats
--------------
-
-Simpleaudio supports standard PCM signed integer formats - basically 
-what is usually contained in a plain WAV file. 
-
-Mono (1-channel) and Stereo (2-channel) audio is supported. 
-
-The following sample rates (in Hz) are allowed, though not necessarily gauranteed 
-to be supported on your platform/hardware. 
-
-- 8000
-- 11025
-- 16000
-- 22050
-- 32000
-- 44100
-- 48000
-- 88200
-- 96000
-- 192000
-
 Installation
 ============
 
