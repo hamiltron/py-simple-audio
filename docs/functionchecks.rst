@@ -1,2 +1,2 @@
-Function Checks
-===============
+simpelaudio.functionchecks module
+=================================
