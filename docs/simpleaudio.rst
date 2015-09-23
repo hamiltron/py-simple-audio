@@ -1,5 +1,5 @@
-:mod:`simpleaudio` --- Simple, asynchronous audio playback
-==========================================================
+:mod:`simpleaudio`
+==================
 
 .. module:: simpleaudio
 
@@ -42,7 +42,7 @@ API
 .. class:: PlayObject
 
    Instances of :class:`PlayObject` are returned by :meth:`WaveObject.play()` and 
-   :func:`.play_buffer()` and are essentially handles to the 
+   :func:`play_buffer()` and are essentially handles to the 
    audio playback jobs initiated and allow basic actions to be taken on the job 
    (such as stopping playback).
 
