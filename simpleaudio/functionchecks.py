@@ -19,14 +19,14 @@ def _get_rates_and_channels():
     return file_list
 
 def run_all(countdown=3):
-    checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
-              StopCheck, StopAllCheck, IsPlayingCheck, WaitDoneCheck]
-    for check in checks:
-        check.run(countdown)
+    func_checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
+                  StopCheck, StopAllCheck, IsPlayingCheck, WaitDoneCheck]
+    for func_check in func_checks:
+        func_check.run(countdown)
 
 class FunctionCheckBase(object):
     @classmethod
-    def check(cls):
+    def _check(cls):
         raise NotImplementedError()
 
     @classmethod
@@ -44,7 +44,7 @@ class FunctionCheckBase(object):
                 print(tick, "...")
                 sleep(1)
         print("RUNNING CHECK ...")
-        cls.check()
+        cls._check()
         print("... DONE")
 
 
@@ -56,7 +56,7 @@ class LeftRightCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj = _gwo("left_right.wav")
         wave_obj.play()
         sleep(4)
@@ -68,7 +68,7 @@ class OverlappingCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj_1 = _gwo("c.wav")
         wave_obj_2 = _gwo("e.wav")
         wave_obj_3 = _gwo("g.wav")
@@ -85,7 +85,7 @@ class RatesAndChannelsCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         for wave_file in  _get_rates_and_channels():
             wave_obj = _gwo(wave_file)
             try:
@@ -103,7 +103,7 @@ class StopCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj_1 = _gwo("c.wav")
         wave_obj_2 = _gwo("e.wav")
         wave_obj_3 = _gwo("g.wav")
@@ -123,7 +123,7 @@ class StopAllCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj_1 = _gwo("c.wav")
         wave_obj_2 = _gwo("e.wav")
         wave_obj_3 = _gwo("g.wav")
@@ -143,7 +143,7 @@ class IsPlayingCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj = _gwo("notes_2_16_44.wav")
         play_obj = wave_obj.play()
         sleep(0.5)
@@ -159,7 +159,7 @@ class WaitDoneCheck(FunctionCheckBase):
     """
 
     @classmethod
-    def check(cls):
+    def _check(cls):
         wave_obj = _gwo("notes_2_16_44.wav")
         play_obj = wave_obj.play()
         play_obj.wait_done()
