@@ -20,26 +20,24 @@ MIT License (see LICENSE.txt)
 #define DBG_OUT stdout
 #define DBG_PRE "[dbg] "
 
+/* debug print function prototypes */
+void dbg1(const char* str, ...);
+void dbg2(const char* str, ...);
+
 /* some handy macros for debug prints used in multiple places */
-#if DEBUG > 0
-    #define DBG_PLAY_OS_CALL \
-        fprintf(DBG_OUT, DBG_PRE"play_os call: ...\n");\
-        fprintf(DBG_OUT, DBG_PRE" ... audio data at %p\n", buffer_obj.buf);\
-        fprintf(DBG_OUT, DBG_PRE" ... list head at %p\n", play_list_head);\
-        fprintf(DBG_OUT, DBG_PRE" ... %d samples\n", len_samples);\
-        fprintf(DBG_OUT, DBG_PRE" ... %d channels\n", num_channels);\
-        fprintf(DBG_OUT, DBG_PRE" ... %d bytes per channel\n", bytes_per_chan);\
-        fprintf(DBG_OUT, DBG_PRE" ... %d Hz sample rate\n", sample_rate);\
-        fprintf(DBG_OUT, DBG_PRE" ... %d microseconds latency\n", latency_us);
+#define DBG_PLAY_OS_CALL \
+    dbg1("play_os call: ...\n");\
+    dbg1(" ... audio data at %p\n", buffer_obj.buf);\
+    dbg1(" ... list head at %p\n", play_list_head);\
+    dbg1(" ... %d samples\n", len_samples);\
+    dbg1(" ... %d channels\n", num_channels);\
+    dbg1(" ... %d bytes per channel\n", bytes_per_chan);\
+    dbg1(" ... %d Hz sample rate\n", sample_rate);\
+    dbg1(" ... %d microseconds latency\n", latency_us);
 
-    #define DBG_DESTROY_BLOB fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
+#define DBG_DESTROY_BLOB dbg1("destroying audio blob at %p\n", audio_blob);
 
-    #define DBG_CREATE_BLOB fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
-#else
-    #define DBG_PLAY_OS_CALL
-    #define DBG_DESTROY_BLOB
-    #define DBG_CREATE_BLOB
-#endif
+#define DBG_CREATE_BLOB dbg1("created audio blob at %p\n", audio_blob);
 
 enum {
     NOT_LAST_ITEM = 0,

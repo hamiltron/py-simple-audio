@@ -17,7 +17,6 @@ def _get_rates_and_channels():
         for name in files:
             if re.match(r'notes_.*', name):
                 file_list.append(name)
-                print(name)
     return file_list
 
 

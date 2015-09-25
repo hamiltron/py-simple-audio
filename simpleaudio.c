@@ -21,17 +21,13 @@ static PyObject* _stop(PyObject *self, PyObject *args)
     play_id_t play_id;
     play_item_t* list_item = play_list_head.next_item;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"_stop call\n");
-    #endif
+    dbg1("_stop call\n");
 
     if (!PyArg_ParseTuple(args, "K", &play_id)) {
         return NULL;
     }
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"looking for play ID %llu\n", play_id);
-    #endif
+    dbg1("looking for play ID %llu\n", play_id);
 
     /* walk the list and find the matching play ID */
     grab_mutex(play_list_head.mutex);
@@ -40,7 +36,7 @@ static PyObject* _stop(PyObject *self, PyObject *args)
             #if DEBUG > 0
             fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
             #endif
-            
+
             grab_mutex(list_item->mutex);
             list_item->stop_flag = SA_STOP;
             release_mutex(list_item->mutex);
@@ -57,17 +53,13 @@ static PyObject* _stop_all(PyObject *self, PyObject *args)
 {
     play_item_t* list_item = play_list_head.next_item;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"_stop_all call\n");
-    #endif
+    dbg1("_stop_all call\n");
 
     /* walk the list and set all audio to stop */
     grab_mutex(play_list_head.mutex);
     while(list_item != NULL) {
-        #if DEBUG > 0
-        fprintf(DBG_OUT, DBG_PRE"stopping ID %llu in list item at %p\n", list_item->play_id, list_item);
-        #endif
-        
+        dbg1("stopping ID %llu in list item at %p\n", list_item->play_id, list_item);
+
         grab_mutex(list_item->mutex);
         list_item->stop_flag = SA_STOP;
         release_mutex(list_item->mutex);
@@ -84,17 +76,13 @@ static PyObject* _is_playing(PyObject *self, PyObject *args)
     play_item_t* list_item = play_list_head.next_item;
     int found = 0;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"_is_playing call\n");
-    #endif
+    dbg1("_is_playing call\n");
 
     if (!PyArg_ParseTuple(args, "K", &play_id)) {
         return NULL;
     }
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"looking for play ID %llu\n", play_id);
-    #endif
+    dbg1("looking for play ID %llu\n", play_id);
 
     /* walk the list and find the matching play ID */
     grab_mutex(play_list_head.mutex);
@@ -103,7 +91,7 @@ static PyObject* _is_playing(PyObject *self, PyObject *args)
             #if DEBUG > 0
             fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
             #endif
-            
+
             found = 1;
         }
         list_item = list_item->next_item;
@@ -126,9 +114,7 @@ static PyObject* _play_buffer(PyObject *self, PyObject *args)
     int sample_rate;
     int num_samples;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"_play_buffer call\n");
-    #endif
+    dbg1("_play_buffer call\n");
 
     if (!PyArg_ParseTuple(args, "Oiii", &audio_obj, &num_channels, &bytes_per_channel, &sample_rate)) {
         return NULL;
@@ -216,9 +202,7 @@ PyInit__simpleaudio(void)
     /* initialize the list head mutex */
     play_list_head.mutex = create_mutex();
 
-    #ifdef DEBUG
-    fprintf(DBG_OUT, DBG_PRE"init'd list head at %p\n", &play_list_head);
-    #endif
+    dbg1("init'd list head at %p\n", &play_list_head);
 
     return m;
 }
@@ -226,9 +210,7 @@ PyInit__simpleaudio(void)
 /*********************************************/
 
 void delete_list_item(play_item_t* play_item) {
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", play_item, play_item->play_id, play_item->prev_item, play_item->next_item);
-    #endif
+    dbg1("deleting list item at %p with ID %llu between (prev) %p and (next) %p\n", play_item, play_item->play_id, play_item->prev_item, play_item->next_item);
 
     if (play_item->next_item != NULL) {
         play_item->next_item->prev_item = play_item->prev_item;
@@ -260,9 +242,7 @@ play_item_t* new_list_item(play_item_t* list_head) {
     new_item->play_id = (list_head->play_id)++;
     new_item->stop_flag = SA_CLEAR;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"new list item at %p with ID %llu attached to %p\n", new_item, new_item->play_id, old_tail);
-    #endif
+    dbg1("new list item at %p with ID %llu attached to %p\n", new_item, new_item->play_id, old_tail);
 
     return new_item;
 }
@@ -277,10 +257,8 @@ int get_buffer_size(int latency_us, int sample_rate, int frame_size) {
 
 void destroy_audio_blob(audio_blob_t* audio_blob) {
     PyGILState_STATE gstate;
-    
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"destroying audio blob at %p\n", audio_blob);
-    #endif
+
+    dbg1("destroying audio blob at %p\n", audio_blob);
 
     /* release the buffer view so Python can
        decrement it's reference count*/
@@ -298,12 +276,34 @@ void destroy_audio_blob(audio_blob_t* audio_blob) {
 
 audio_blob_t* create_audio_blob() {
     audio_blob_t* audio_blob = PyMem_Malloc(sizeof(audio_blob_t));
-    
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"created audio blob at %p\n", audio_blob);
-    #endif
-    
+
+    dbg1("created audio blob at %p\n", audio_blob);
+
     memset(audio_blob, 0, sizeof(audio_blob_t));
-    
+
     return audio_blob;
+}
+
+/********************************************/
+
+void dbg1(const char* str, ...) {
+#if DEBUG > 0
+    va_list args;
+
+    va_start(args, str);
+    fprintf(DBG_OUT, DBG_PRE);
+    vfprintf(DBG_OUT, str, args);
+    va_end(args);
+#endif
+}
+
+void dbg2(const char* str, ...) {
+#if DEBUG > 1
+    va_list args;
+
+    va_start(args, str);
+    fprintf(DBG_OUT, DBG_PRE);
+    vfprintf(DBG_OUT, str, args);
+    va_end(args);
+#endif
 }

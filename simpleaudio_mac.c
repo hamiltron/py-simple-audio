@@ -1,6 +1,6 @@
-/* 
+/*
 Simpleaudio Python Extension
-Copyright (C) 2015, Joe Hamilton 
+Copyright (C) 2015, Joe Hamilton
 MIT License (see LICENSE.txt)
 */
 
@@ -25,23 +25,17 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     int have = audio_blob->len_bytes-audio_blob->used_bytes;
     int stop_flag;
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"audio_callback call with audio blob at %p\n", param);
-    #endif
+    dbg2("audio_callback call with audio blob at %p\n", param);
 
     grab_mutex(audio_blob->play_list_item->mutex);
     stop_flag = audio_blob->play_list_item->stop_flag;
     release_mutex(audio_blob->play_list_item->mutex);
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stop_flag);
-    #endif
+    dbg2("stop flag: %d\n", stop_flag);
 
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stop_flag) {
-        #if DEBUG > 1
-        fprintf(DBG_OUT, DBG_PRE"still feeding queue\n");
-        #endif
+        dbg2("still feeding queue\n");
 
         if (have > want) {have = want;}
         memcpy(queue_buffer->mAudioData, audio_blob->buffer_obj.buf + (size_t)(audio_blob->used_bytes), have);
@@ -50,19 +44,15 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
         AudioQueueEnqueueBuffer(audio_queue, queue_buffer, 0, NULL);
     /* ... no more audio left to buffer */
     } else {
-        #if DEBUG > 1
-        fprintf(DBG_OUT, DBG_PRE"done enqueue'ing - dellocating a buffer\n");
-        #endif
+        dbg2("done enqueue'ing - dellocating a buffer\n");
 
         if (audio_blob->num_buffers > 0) {
             AudioQueueFreeBuffer(audio_queue, queue_buffer);
             audio_blob->num_buffers--;
         }
         if (audio_blob->num_buffers == 0) {
-            #if DEBUG > 1
-            fprintf(DBG_OUT, DBG_PRE"buffers deallocated - stopping queue\n");
-            #endif
-            
+            dbg2("buffers deallocated - stopping queue\n");
+
             /* all done, cleanup */
             AudioQueueStop(audio_queue, true);
             AudioQueueDispose(audio_queue, true);
@@ -71,7 +61,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     }
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan,
                   int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     AudioQueueRef audio_queue;
@@ -93,7 +83,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytesPerFrame;
     audio_blob->num_buffers = NUM_BUFS;
-    
+
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
     audio_blob->play_list_item = new_list_item(play_list_head);
@@ -125,9 +115,8 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         return NULL;
     }
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"allocating %d queue buffers of %d bytes\n", NUM_BUFS, buffer_size);
-    #endif
+    dbg1("allocating %d queue buffers of %d bytes\n", NUM_BUFS, buffer_size);
+
     for(i = 0; i < NUM_BUFS; i++) {
         result = AudioQueueAllocateBuffer(audio_queue, buffer_size, &queue_buffer);
         if (result != SUCCESS) {

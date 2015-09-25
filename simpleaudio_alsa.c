@@ -1,6 +1,6 @@
-/* 
+/*
 Simpleaudio Python Extension
-Copyright (C) 2015, Joe Hamilton 
+Copyright (C) 2015, Joe Hamilton
 MIT License (see LICENSE.txt)
 */
 
@@ -15,7 +15,6 @@ MIT License (see LICENSE.txt)
 
 #define RESAMPLE (1)
 
-
 void* playback_thread(void* thread_param) {
     audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
     void* audio_ptr;
@@ -25,18 +24,14 @@ void* playback_thread(void* thread_param) {
     int result;
     int stop_flag = 0;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"playback thread started with audio blob at %p\n", thread_param);
-    #endif
+    dbg1("playback thread started with audio blob at %p\n", thread_param);
 
     while (samples_left > 0 && !stop_flag) {
         grab_mutex(audio_blob->play_list_item->mutex);
         stop_flag = audio_blob->play_list_item->stop_flag;
         release_mutex(audio_blob->play_list_item->mutex);
 
-        #if DEBUG > 1
-        fprintf(DBG_OUT, DBG_PRE"loop iteration with stop flag: %d\n", stop_flag);
-        #endif
+        dbg2("loop iteration with stop flag: %d\n", stop_flag);
 
         if (samples_left < audio_blob->buffer_size) {
             play_samples = samples_left;
@@ -46,15 +41,11 @@ void* playback_thread(void* thread_param) {
         audio_ptr = audio_blob->buffer_obj.buf + (size_t)(audio_blob->used_bytes);
         result = snd_pcm_writei(audio_blob->handle, audio_ptr, play_samples);
         if (result < 0) {
-            #if DEBUG > 1
-            fprintf(DBG_OUT, DBG_PRE"snd_pcm_writei error code: %d\n", result);
-            #endif
+            dbg2("snd_pcm_writei error code: %d\n", result);
 
             result = snd_pcm_recover(audio_blob->handle, result, 0);
             if (result < 0) {
-                #if DEBUG > 1
-                fprintf(DBG_OUT, DBG_PRE"unrecoverable error - code: %d\n", result);
-                #endif
+                dbg2("unrecoverable error - code: %d\n", result);
 
                 /* unrecoverable error */
                 break;
@@ -62,26 +53,22 @@ void* playback_thread(void* thread_param) {
         } else {
             audio_blob->used_bytes += result * audio_blob->frame_size;
         }
-        
+
         samples_left = (audio_blob->len_bytes - audio_blob->used_bytes) / audio_blob->frame_size;
     }
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"done buffering audio - cleaning up\n");
-    #endif
+    dbg2("done buffering audio - cleaning up\n");
 
     snd_pcm_drain(audio_blob->handle);
     snd_pcm_close(audio_blob->handle);
     destroy_audio_blob(audio_blob);
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"playback thread done");
-    #endif
+    dbg1("playback thread done");
 
     pthread_exit(0);
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan,
                   int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     audio_blob_t* audio_blob;
@@ -92,15 +79,15 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     int result;
     snd_pcm_hw_params_t* hw_params;
     snd_pcm_uframes_t buffer_frames;
-    
+
     /* not sure where the best place to do this is or if it matters */
     snd_pcm_hw_params_alloca(&hw_params);
-    
+
     DBG_PLAY_OS_CALL
 
     /* set that format appropriately */
     if (bytes_per_chan == 1) {
-            
+
     } else if (bytes_per_chan == 2) {
         sample_format = SND_PCM_FORMAT_S16_LE;
     } else {
@@ -114,7 +101,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytes_per_frame;
     audio_blob->frame_size = bytes_per_frame;
-    
+
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
     audio_blob->play_list_item = new_list_item(play_list_head);
@@ -129,7 +116,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
      }
 
     /* set the PCM params using ALSA's convenience function */
-    result = snd_pcm_set_params(audio_blob->handle, sample_format, SND_PCM_ACCESS_RW_INTERLEAVED, 
+    result = snd_pcm_set_params(audio_blob->handle, sample_format, SND_PCM_ACCESS_RW_INTERLEAVED,
                                 num_channels, sample_rate, RESAMPLE, latency_us);
     if (result < 0) {
         ALSA_EXCEPTION("Error setting parameters.", result, snd_strerror(result), err_msg_buf);
@@ -157,9 +144,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
     audio_blob->buffer_size = buffer_frames * bytes_per_chan * num_channels;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"ALSA sayd buffer size is %d bytes\n", audio_blob->buffer_size);
-    #endif
+    dbg1("ALSA sayd buffer size is %d bytes\n", audio_blob->buffer_size);
 
     /* fire off the playback thread */
     result = pthread_create(&play_thread, NULL, playback_thread, (void*)audio_blob);

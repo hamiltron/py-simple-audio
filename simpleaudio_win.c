@@ -1,6 +1,6 @@
-/* 
+/*
 Simpleaudio Python Extension
-Copyright (C) 2015, Joe Hamilton 
+Copyright (C) 2015, Joe Hamilton
 MIT License (see LICENSE.txt)
 */
 
@@ -30,24 +30,18 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, audio_blob_t* audio_blob) {
     int stop_flag = 0;
     MMRESULT result;
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"fill_buffer call with audio blob at %p\n", audio_blob);
-    #endif
+    dbg2("fill_buffer call with audio blob at %p\n", audio_blob);
 
     grab_mutex(audio_blob->play_list_item->mutex);
     stop_flag = audio_blob->play_list_item->stop_flag;
     release_mutex(audio_blob->play_list_item->mutex);
 
-    #if DEBUG > 1
-    fprintf(DBG_OUT, DBG_PRE"stop flag: %d\n", stop_flag);
-    #endif
-    
+    dbg2("stop flag: %d\n", stop_flag);
+
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stop_flag) {
-        #if DEBUG > 1
-        fprintf(DBG_OUT, DBG_PRE"still filling buffers\n");
-        #endif
-        
+        dbg2("still filling buffers\n");
+
         if (have > want) {have = want;}
         result = waveOutUnprepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
         if (result != MMSYSERR_NOERROR) {return result;}
@@ -61,19 +55,15 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, audio_blob_t* audio_blob) {
     /* ... no more audio left to buffer */
     } else {
         if (audio_blob->num_buffers > 0) {
-            #if DEBUG > 1
-            fprintf(DBG_OUT, DBG_PRE"done buffering - dellocating a buffer\n");
-            #endif
-            
+            dbg2("done buffering - dellocating a buffer\n");
+
             PyMem_Free(wave_header->lpData);
             PyMem_Free(wave_header);
             audio_blob->num_buffers--;
-        } 
+        }
         if (audio_blob->num_buffers == 0) {
-            #if DEBUG > 1
-            fprintf(DBG_OUT, DBG_PRE"playback finished - cleaning up\n");
-            #endif
-            
+            dbg2("playback finished - cleaning up\n");
+
             /* all done, cleanup */
             waveOutClose(audio_blob->handle);
             destroy_audio_blob(audio_blob);
@@ -81,7 +71,7 @@ MMRESULT fill_buffer(WAVEHDR* wave_header, audio_blob_t* audio_blob) {
             return MMSYSERR_NOERROR - 1;
         }
     }
-    
+
     return MMSYSERR_NOERROR;
 }
 
@@ -91,9 +81,7 @@ DWORD WINAPI bufferThread(LPVOID thread_param) {
     WAVEHDR* wave_header;
     MMRESULT result;
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"buffer thread started with audio blob at %p\n", thread_param);
-    #endif
+    dbg1("buffer thread started with audio blob at %p\n", thread_param);
 
     /* wait for the "audio block done" message" */
     while (1) {
@@ -102,30 +90,24 @@ DWORD WINAPI bufferThread(LPVOID thread_param) {
             wave_header = (WAVEHDR*)message.lParam;
             result = fill_buffer(wave_header, audio_blob);
             if (result != MMSYSERR_NOERROR) {
-                #if DEBUG > 0
-                fprintf(DBG_OUT, DBG_PRE"result code %d - quitting buffer loop\n", result);
-                #endif
-                
+                dbg1("result code %d - quitting buffer loop\n", result);
+
                 break;
             }
         }
         if (message.message == WM_QUIT) {
-            #if DEBUG > 0
-            fprintf(DBG_OUT, DBG_PRE"got WM_QUIT message\n");
-            #endif
-            
+            dbg1("got WM_QUIT message\n");
+
             break;
         }
     }
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"buffer thread done\n");
-    #endif
+    dbg1("buffer thread done\n");
 
     return 0;
 }
 
-PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan, 
+PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan,
                   int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
@@ -148,7 +130,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytes_per_frame;
     audio_blob->num_buffers = NUM_BUFS;
-        
+
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
     audio_blob->play_list_item = new_list_item(play_list_head);
@@ -190,9 +172,8 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         return NULL;
     }
 
-    #if DEBUG > 0
-    fprintf(DBG_OUT, DBG_PRE"allocating %d buffers of %d bytes\n", NUM_BUFS, buffer_size);
-    #endif
+    dbg1("allocating %d buffers of %d bytes\n", NUM_BUFS, buffer_size);
+
     for (i = 0; i < NUM_BUFS; i++) {
         temp_wave_hdr = PyMem_Malloc(sizeof(WAVEHDR));
         memset(temp_wave_hdr, 0, sizeof(WAVEHDR));

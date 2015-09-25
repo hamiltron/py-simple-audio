@@ -27,7 +27,7 @@ simpleaudio_c_ext = Extension(
     sources=platform_sources+['simpleaudio.c'],
     libraries=platform_libs,
     extra_link_args=platform_link_args,
-    define_macros=[('DEBUG', '1')])
+    define_macros=[('DEBUG', '2')])
 
 VERSION = "0.1.0"
 
