@@ -29,7 +29,7 @@ simpleaudio_c_ext = Extension(
     extra_link_args=platform_link_args,
     define_macros=[('DEBUG', '2')])
 
-VERSION = "0.1.0"
+VERSION = "1.0.0"
 
 setup(
     name='simpleaudio',

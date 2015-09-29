@@ -4,33 +4,30 @@
 .. module:: simpleaudio.functionchecks
    :synopsis: Provides tests of functionality by playing various test audio clips.
 
-The :mod:`~simpleaudio.functionchecks` module contains a number of classes that all inherit 
-from :class:`FunctionCheckBase` which provides :meth:`~FunctionCheckBase.run()` class method common to 
-all function checks. These may be run individually with :meth:`~FunctionCheckBase.run()` 
+The :mod:`~simpleaudio.functionchecks` module contains a number of classes that all inherit
+from :class:`FunctionCheckBase` which provides :meth:`~FunctionCheckBase.run()` class method common to
+all function checks. These may be run individually with :meth:`~FunctionCheckBase.run()`
 or all test may be run with :func:`run_all()`.
-   
-Examples
---------
 
 API
 ---
 
 .. function::  run_all(countdown=3)
 
-   Runs all function checks in succession. 
+   Runs all function checks in succession.
 
    :param int countdown: the number of seconds to pause before running each test
-   
+
 .. class:: FunctionCheckBase
 
-   A base class for all function checks. 
+   A base class for all function checks.
 
 .. method:: FunctionCheckBase.run(countdown=0)
 
-   Runs a particular function check. 
+   Runs a particular function check.
 
    :param int countdown: the number of seconds to pause before running the test
-   
+
 .. class:: LeftRightCheck
 
    Checks stereo playback by first playing a note
@@ -70,3 +67,18 @@ API
    Checks functionality of the wait_done() method
    by using it to allow the three-note clip to play
    until finished (before attempting to stop playback).
+
+Examples
+--------
+
+Run all checks::
+
+   import simpleaudio.functionchecks as fc
+
+   fc.run_all()
+
+Run a single check::
+
+   import simpleaudio.functionchecks as fc
+
+   fc.LeftRightCheck.run()

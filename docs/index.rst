@@ -21,9 +21,13 @@ Simple Example::
    play_obj = wave_obj.play()
    play_obj.wait_done()
 
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
 
    overview
+   tutorial
    simpleaudio
    functionchecks
