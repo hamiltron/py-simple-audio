@@ -9,22 +9,14 @@ execution continues immediately after audio playback is started and a background
 thread takes care of the rest. This makes it easy to incorporate audio playback
 into GUI-driven applications that need to remain responsive. This also means that
 real-time audio applications (such as a synthesizer) are not possible since the entire
-audio clip to be played must be ready.
+audio clip to be played must be ready before playback.
 
 Supported Platforms
 -------------------
 
-* Windows
-   * 7
-   * 8.1 (not verified)
-   * 10 (not verified)
-
-* OSX
-   * 10.3 - 10.8 (not verified)
-   * 10.9
-   * 10.10 (not verified)
-
-* Linux - should support any distro with a working ALSA implementation
+* Windows: 7 or newer
+* OSX: 10.7 (Lion) or newer
+* Linux: should support any distro with a working ALSA implementation
 
 Audio Formats
 -------------

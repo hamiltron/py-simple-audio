@@ -67,7 +67,49 @@ Similarly, instances can be created from Wave_read objects returned from
 Using Numpy
 -----------
 
-TO DO
+Numpy arrays can be used to store audio but there are a few crucial
+requirements. If they are to store stereo audio, the array must have two 
+columns since each column 
+contains one channel of audio data. They must also have a signed 16-bit 
+integer dtype and the sample amplitude values must consequently fall in the 
+range of -32768 to 32767. Here is an example of a simple way to 'normalize' 
+the audio (making it cover the whole amplitude rage but not exceeding it)::
 
+   audio_array *= 32767 / max(abs(audio_array))
 
+And here is an example of converting it to the proper data type::
 
+   audio_array = audio_array.astype(np.int16, order='C')
+   
+Here is a full example that plays a few sinewave notes in succession::
+
+   import numpy as np
+   import simpleaudio as sa
+
+   # calculate note frequencies
+   A_freq = 440
+   Csh_freq = A_freq * 2 ** (4 / 12)
+   E_freq = A_freq * 2 ** (7 / 12)
+
+   # get timesteps for each sample, T is note duration in seconds
+   sample_rate = 44100
+   T = 0.25
+   t = np.linspace(0, T, T * sample_rate, False)
+
+   # generate sine wave notes
+   A_note = np.sin(A_freq * t * 2 * np.pi)
+   Csh_note = np.sin(Csh_freq * t * 2 * np.pi)
+   E_note = np.sin(E_freq * t * 2 * np.pi)
+
+   # concatenate notes
+   audio = np.hstack((A_note, Csh_note, E_note))
+   # normalize to 16-bit range
+   audio *= 32767
+   # convert to 16-bit data
+   audio = audio.astype(np.int16)
+
+   # start playback
+   play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
+
+   # wait for it to finish before exiting
+   play_obj.wait_done()

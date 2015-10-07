@@ -8,10 +8,12 @@ import sys
 platform_sources = []
 platform_libs = []
 platform_link_args = []
+platform_compile_args = []
 
 if sys.platform == 'darwin':
     platform_sources = ['simpleaudio_mac.c', 'posix_mutex.c']
     platform_link_args = ['-framework', 'AudioToolbox']
+    platform_compile_args = ['-mmacosx-version-min=10.7']
 elif sys.platform == 'linux':
     platform_sources = ['simpleaudio_alsa.c', 'posix_mutex.c']
     platform_libs = ['asound']
@@ -26,8 +28,9 @@ simpleaudio_c_ext = Extension(
     '_simpleaudio',
     sources=platform_sources+['simpleaudio.c'],
     libraries=platform_libs,
+    extra_compile_args=platform_compile_args,
     extra_link_args=platform_link_args,
-    define_macros=[('DEBUG', '2')])
+    define_macros=[('DEBUG', '0')])
 
 VERSION = "1.0.0"
 
