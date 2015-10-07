@@ -77,9 +77,10 @@ the audio (making it cover the whole amplitude rage but not exceeding it)::
 
    audio_array *= 32767 / max(abs(audio_array))
 
-And here is an example of converting it to the proper data type::
+And here is an example of converting it to the proper data type (note that 
+this should always be done *after* normalization or other amplitude changes)::
 
-   audio_array = audio_array.astype(np.int16, order='C')
+   audio_array = audio_array.astype(np.int16)
    
 Here is a full example that plays a few sinewave notes in succession::
 
@@ -104,7 +105,7 @@ Here is a full example that plays a few sinewave notes in succession::
    # concatenate notes
    audio = np.hstack((A_note, Csh_note, E_note))
    # normalize to 16-bit range
-   audio *= 32767
+   audio *= 32767 / max(abs(audio))
    # convert to 16-bit data
    audio = audio.astype(np.int16)
 

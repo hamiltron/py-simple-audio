@@ -26,8 +26,9 @@ what is usually contained in a **plain WAV file**.
 
 Mono (1-channel) and stereo (2-channel) audio is supported.
 
-The following sample rates (in Hz) are allowed, though not necessarily gauranteed
-to be supported on your platform/hardware: 8, 11.025, 16, 22.05, 32, 44.1, 48, 88.2, 96, and 192 kHz.
+The following sample rates are allowed (though not necessarily gauranteed
+to be supported on your platform/hardware): 8, 11.025, 16, 22.05, 32, 44.1, 
+48, 88.2, 96, and 192 kHz.
 
 Installation
 ============
