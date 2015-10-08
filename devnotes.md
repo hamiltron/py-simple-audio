@@ -10,7 +10,7 @@
 * hook into module shutdown to explicitly stop audio playback
 * look into possible handle/memrory leaks upon Win or ALSA errors
 * investigate what happens when less than 1 (and 2) buffers-worth of audio is played
-
+* check for memory allocation failure and return errors
 
 ## Tag-Release Cycle
 
