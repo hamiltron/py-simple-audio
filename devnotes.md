@@ -1,3 +1,13 @@
+## To Do
+
+* add docstrings to public classes/methods
+* fix function check paragraph prints
+* generate rest of audio format samples
+* add latency options
+* look into 24 and 32 bit audio
+* add play ID to as many debug prints as possible
+* add buffer pointers, etc to debug prints
+
 ## Tag-Release Cycle
 
 1. update docs
