@@ -7,6 +7,10 @@
 * look into 24 and 32 bit audio
 * add play ID to as many debug prints as possible
 * add buffer pointers, etc to debug prints
+* hook into module shutdown to explicitly stop audio playback
+* look into possible handle/memrory leaks upon Win or ALSA errors
+* investigate what happens when less than 1 (and 2) buffers-worth of audio is played
+
 
 ## Tag-Release Cycle
 
