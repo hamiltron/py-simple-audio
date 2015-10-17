@@ -105,7 +105,7 @@ Here is a full example that plays a few sinewave notes in succession::
    # concatenate notes
    audio = np.hstack((A_note, Csh_note, E_note))
    # normalize to 16-bit range
-   audio *= 32767 / max(abs(audio))
+   audio *= 32767 / np.max(np.abs(audio))
    # convert to 16-bit data
    audio = audio.astype(np.int16)
 

@@ -27,7 +27,7 @@ what is usually contained in a **plain WAV file**.
 Mono (1-channel) and stereo (2-channel) audio is supported.
 
 The following sample rates are allowed (though not necessarily gauranteed
-to be supported on your platform/hardware): 8, 11.025, 16, 22.05, 32, 44.1, 
+to be supported on your platform/hardware): 8, 11.025, 16, 22.05, 32, 44.1,
 48, 88.2, 96, and 192 kHz.
 
 Installation
@@ -40,17 +40,17 @@ Install with::
 Linux
 -----
 
-First PIP for Python 3 is probably not installed by default. For Debian 
+First PIP for Python 3 is probably not installed by default. For Debian
 variants use::
 
-sudo apt-get install python3-pip
+   sudo apt-get install python3-pip
 
-The exact command to invoke PIP can vary and may be something like `pip-3.3` 
-(for Python 3.3). 
+The exact command to invoke PIP can vary and may be something like `pip-3.3`
+(for Python 3.3).
 
 The Python 3 and ALSA development packages are required for pip to build
 the extension. For Debian variants, this will usually get the job done::
 
-   sudo apt-get install -y python3-dev asound2-dev
+   sudo apt-get install -y python3-dev libasound2-dev
 
 
