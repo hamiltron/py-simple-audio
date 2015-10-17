@@ -37,12 +37,19 @@ Install with::
 
    pip3 install simpleaudio
 
-Linux Dependencies
-------------------
+Linux
+-----
+
+First PIP for Python 3 is probably not installed by default. For Debian 
+variants use::
+
+sudo apt-get install python3-pip
+
+The exact command to invoke PIP can vary and may be something like `pip-3.3` 
+(for Python 3.3). 
 
 The Python 3 and ALSA development packages are required for pip to build
-the extension. For Debian, Ubuntu, and Raspbian,
-this will usually get the job done::
+the extension. For Debian variants, this will usually get the job done::
 
    sudo apt-get install -y python3-dev asound2-dev
 
