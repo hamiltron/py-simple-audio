@@ -28,3 +28,7 @@
   * osx - build and modify wheels to work on all versions
   * windows - build 32-bit
 9. push to PyPI
+
+## Windows Builds
+
+[VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
