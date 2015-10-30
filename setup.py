@@ -36,7 +36,6 @@ VERSION = "1.0.0"
 
 setup(
     name='simpleaudio',
-    packages=['simpleaudio'],
     version=VERSION,
     license='MIT',
     description="The simpleaudio module which makes playing "
@@ -48,7 +47,8 @@ setup(
               'sound', 'alsa', 'coreaudio', 'winmm', 'music'],
     classifiers=['License :: OSI Approved :: MIT License',
                  'Programming Language :: Python :: 3.3',
-                 'Programming Language :: Python :: 3.4'],
+                 'Programming Language :: Python :: 3.4',
+                 'Programming Language :: Python :: 3.5'],
     test_suite="tests",
     py_modules=["simpleaudio.shiny", "simpleaudio.functionchecks"],
     ext_modules=[simpleaudio_c_ext])
