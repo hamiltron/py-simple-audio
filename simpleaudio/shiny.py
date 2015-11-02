@@ -2,7 +2,7 @@
 # Copyright (C) 2015, Joe Hamilton
 # MIT License (see LICENSE.txt)
 
-import _simpleaudio as _sa
+import simpleaudio._simpleaudio as _sa
 from time import sleep
 import wave
 

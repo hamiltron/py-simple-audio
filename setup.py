@@ -11,22 +11,22 @@ platform_link_args = []
 platform_compile_args = []
 
 if sys.platform == 'darwin':
-    platform_sources = ['simpleaudio_mac.c', 'posix_mutex.c']
+    platform_sources = ['c_src/simpleaudio_mac.c', 'c_src/posix_mutex.c']
     platform_link_args = ['-framework', 'AudioToolbox']
     platform_compile_args = ['-mmacosx-version-min=10.7']
 elif sys.platform.startswith("linux"):
-    platform_sources = ['simpleaudio_alsa.c', 'posix_mutex.c']
+    platform_sources = ['c_src/simpleaudio_alsa.c', 'c_src/posix_mutex.c']
     platform_libs = ['asound']
 elif sys.platform == 'win32':
-    platform_sources = ['simpleaudio_win.c', 'windows_mutex.c']
+    platform_sources = ['c_src/simpleaudio_win.c', 'c_src/windows_mutex.c']
     platform_libs = ['Winmm', 'User32']
 else:
     pass
     # define a compiler macro for unsupported ?
 
 simpleaudio_c_ext = Extension(
-    '_simpleaudio',
-    sources=platform_sources+['simpleaudio.c'],
+    'simpleaudio._simpleaudio',
+    sources=platform_sources+['c_src/simpleaudio.c'],
     libraries=platform_libs,
     extra_compile_args=platform_compile_args,
     extra_link_args=platform_link_args,
