@@ -1,1 +1,1 @@
-recursive-include test_audio *
+recursive-include simpleaudio/test_audio *

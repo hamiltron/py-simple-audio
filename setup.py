@@ -51,4 +51,7 @@ setup(
                  'Programming Language :: Python :: 3.5'],
     test_suite="tests",
     py_modules=["simpleaudio.shiny", "simpleaudio.functionchecks"],
-    ext_modules=[simpleaudio_c_ext])
+    ext_modules=[simpleaudio_c_ext],
+    packages=['simpleaudio'],
+    package_dir={'simpleaudio': 'simpleaudio'},
+    package_data={'simpleaudio': ['test_audio/*.wav']},)
