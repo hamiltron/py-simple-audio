@@ -4,8 +4,8 @@ import os
 from time import sleep
 import re
 
-AUDIO_DIR = "test_audio"
-
+MODULE_PATH = os.path.dirname(__file__)
+AUDIO_DIR =  os.path.join(MODULE_PATH, "test_audio")
 
 def _gwo(wave_obj_file):
     return sa.WaveObject.from_wave_file(os.path.join(AUDIO_DIR, wave_obj_file))
@@ -18,7 +18,6 @@ def _get_rates_and_channels():
             if re.match(r'notes_.*', name):
                 file_list.append(name)
     return file_list
-
 
 def run_all(countdown=3):
     func_checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
