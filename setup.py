@@ -13,7 +13,7 @@ platform_compile_args = []
 if sys.platform == 'darwin':
     platform_sources = ['c_src/simpleaudio_mac.c', 'c_src/posix_mutex.c']
     platform_link_args = ['-framework', 'AudioToolbox']
-    platform_compile_args = ['-mmacosx-version-min=10.7']
+    platform_compile_args = ['-mmacosx-version-min=10.6']
 elif sys.platform.startswith("linux"):
     platform_sources = ['c_src/simpleaudio_alsa.c', 'c_src/posix_mutex.c']
     platform_libs = ['asound']

@@ -21,8 +21,10 @@ class WaveObject(object):
 
     @classmethod
     def from_wave_file(cls, wave_file):
-        with wave.open(wave_file, 'rb') as wave_read:
-            return cls.from_wave_read(wave_read)
+        wave_read = wave.open(wave_file, 'rb')
+        wave_obj = cls.from_wave_read(wave_read)
+        wave_read.close()
+        return wave_obj
 
     @classmethod
     def from_wave_read(cls, wave_read):

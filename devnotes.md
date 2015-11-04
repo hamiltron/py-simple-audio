@@ -26,7 +26,7 @@
 8. build distributions for Python 3.3, 3.4, 3.5
   * linux - sdist
   * osx - build and modify wheels to work on all versions
-  * windows - build 32-bit
+  * windows
 9. push to PyPI
 
 ## Windows Builds
@@ -34,3 +34,5 @@
 [VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
 
 [Super handy info on Windows builds](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
+
+[package_data reference](https://docs.python.org/3.5/distutils/setupscript.html)

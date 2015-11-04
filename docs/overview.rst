@@ -11,12 +11,23 @@ into GUI-driven applications that need to remain responsive. This also means tha
 real-time audio applications (such as a synthesizer) are not possible since the entire
 audio clip to be played must be ready before playback.
 
-Supported Platforms
--------------------
+Compatibility
+-------------
+
+Platforms
+#########
 
 * Windows: 7 or newer
-* OSX: 10.7 (Lion) or newer
+* OSX: 10.6 (Snow Leopard) or newer
 * Linux: should support any distro with a working ALSA implementation
+
+Python
+######
+
+Python 3.3 and up is officially supported and wheels are available for 
+Windows and OSX. Earlier minor versions of Python 3 may work as well when 
+building the extension from source (as on Linux) and it has been 
+confirmed to work with Python 3.2 on the Raspberry Pi. 
 
 Audio Formats
 -------------
@@ -40,7 +51,10 @@ Install with::
 Linux
 -----
 
-First PIP for Python 3 is probably not installed by default. For Debian
+Pip
+###
+
+Pip for Python 3 may not installed by default. For Debian
 variants use::
 
    sudo apt-get install python3-pip
@@ -48,9 +62,11 @@ variants use::
 The exact command to invoke PIP can vary and may be something like `pip-3.3`
 (for Python 3.3).
 
+Dependencies
+############
+
 The Python 3 and ALSA development packages are required for pip to build
 the extension. For Debian variants, this will usually get the job done::
 
    sudo apt-get install -y python3-dev libasound2-dev
-
 

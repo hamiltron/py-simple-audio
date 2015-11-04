@@ -1,57 +1,27 @@
 Simpleaudio
 ===========
 
-Description
+The simplaudio package provides cross-platform, dependency-free audio playback
+capability for Python 3 on OSX, Windows, and Linux. 
+
+MIT Licensed.
+
+Quick-Start
 -----------
 
-The simpleaudio module for Python 3 makes cross-platform audio playback
-very simple. It plays audio from an existing, fixed-length buffer - i.e. 
-it doesn't support real-time generated audio. It is designed to work 
-seamlessly with the Wave module in the Python standard libarary. 
+Install with::
 
-Platforms
----------
+   pip3 install simpleaudio
 
-- Windows:
-  - 7
-  - 8/8.1 (not verified)
-  - 10 (not verified)
-  
-- OSX:
-  - 10.8 and below (not verified)
-  - 10.9
-  - 10.10 (not verified)
+   (see documentation for Linux installation)
 
-- Linux: should work on any disto with a successful build against ALSA (see installation notes below)
+Simple Example::
 
-Installation
-============
-
-Installation should hopefully be as simple as 
-
-::
-
-pip3 install simpleaudio
-
-Linux
------
-
-Unless someone creates a package for your distro, building from source is necessary. 
-Luckily, pip automates the whole process. Only a few important packages (listed below) 
-will need to be present before installing/building simpleaudio. One these are installed,
-run the installation command above. 
-
-LIST TODO
-
-Simple Example
-========
-
-::
-
-import simpleaudio as sa
-wave_obj = sa.WaveObject.from_wave_file("my_wave.wav")
-play_obj = wave_obj.play()
-play_obj.wait_done()
+   import simpleaudio as sa
+   
+   wave_obj = sa.WaveObject.from_wave_file("path/to/file.wav")
+   play_obj = wave_obj.play()
+   play_obj.wait_done()
 
 Documentation
 =============
