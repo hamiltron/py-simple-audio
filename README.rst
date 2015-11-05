@@ -17,7 +17,7 @@ your platform and Python version)::
 
    pip install simpleaudio
 
-See documentation for additional Linux installation information.
+See documentation for additional installation information.
 
 Simple Example
 --------------
