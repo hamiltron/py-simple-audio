@@ -16,7 +16,7 @@ the `pip documentation <http://pip.readthedocs.org>`_.
    variants for Python 3.x are: ``pip3``, ``pip3.x``, and ``pip-3.x``.
 
    Also, in some cases you may need to manually add pip's location
-   to the shell executable path.
+   to the 'path' environment variable.
 
 Upgrade pip and setuptools::
 
