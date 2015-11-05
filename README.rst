@@ -2,29 +2,33 @@ Simpleaudio Package
 ===================
 
 The simplaudio package provides cross-platform, dependency-free audio playback
-capability for Python 3 on OSX, Windows, and Linux. 
+capability for Python 3 on OSX, Windows, and Linux.
 
 MIT Licensed.
 
-Quick-Start
------------
+`Documentation at RTD <http://simpleaudio.readthedocs.org/>`_
+-------------------------------------------------------------
 
-Install with::
+Installation
+------------
 
-   pip3 install simpleaudio
+Installation (make sure the ``pip`` command is the right one for
+your platform and Python version)::
 
-   (see documentation for Linux installation)
+   pip install simpleaudio
 
-Simple Example::
+See documentation for additional Linux installation information.
+
+Simple Example
+--------------
+
+..code-block:: python
 
    import simpleaudio as sa
-   
+
    wave_obj = sa.WaveObject.from_wave_file("path/to/file.wav")
    play_obj = wave_obj.play()
    play_obj.wait_done()
-
-`Documentation at RTD <http://simpleaudio.readthedocs.org/>`_
-=============================================================
 
 
 

@@ -37,8 +37,8 @@ useful when a script or program would otherwise exit before playback is done
    # script exit
 
 
-:class:`~simpleaudio.WaveObject` 's
------------------------------------
+WaveObject's
+------------
 
 In order to facilitate cleaner code, the :class:`~simpleaudio.WaveObject` 
 class is provided which stores a reference to the object containing the 

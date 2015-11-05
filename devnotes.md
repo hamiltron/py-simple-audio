@@ -11,6 +11,7 @@
 * look into possible handle/memrory leaks upon Win or ALSA errors
 * investigate what happens when less than 1 (and 2) buffers-worth of audio is played
 * check for memory allocation failure and return errors
+* add external links (like pip & buffer protocol) to documentation
 
 ## Tag-Release Cycle
 
@@ -34,5 +35,7 @@
 [VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
 
 [Super handy info on Windows builds](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
+
+## Distribution Stuff
 
 [package_data reference](https://docs.python.org/3.5/distutils/setupscript.html)
