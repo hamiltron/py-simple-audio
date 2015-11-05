@@ -22,7 +22,7 @@ See documentation for additional installation information.
 Simple Example
 --------------
 
-..code-block:: python
+.. code-block:: python
 
    import simpleaudio as sa
 
