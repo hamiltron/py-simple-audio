@@ -38,4 +38,6 @@
 
 ## Distribution Stuff
 
+[amazing](https://tom-christie.github.io/articles/pypi/)
+
 [package_data reference](https://docs.python.org/3.5/distutils/setupscript.html)

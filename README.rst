@@ -6,8 +6,8 @@ capability for Python 3 on OSX, Windows, and Linux.
 
 MIT Licensed.
 
-`Documentation at RTD <http://simpleaudio.readthedocs.org/>`_
--------------------------------------------------------------
+`Documentation at RTFD <http://simpleaudio.readthedocs.org/>`_
+--------------------------------------------------------------
 
 Installation
 ------------

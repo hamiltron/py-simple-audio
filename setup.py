@@ -38,8 +38,11 @@ setup(
     name='simpleaudio',
     version=VERSION,
     license='MIT',
-    description="The simpleaudio module which makes playing "
-                "wave audio in Python very simple.",
+    description="The simplaudio package provides cross-platform, "
+                     "dependency-free audio playback "
+                     "capability for Python 3 on OSX, Windows, and Linux.",
+    long_description="`Documentation at RTFD "
+                     "<http://simpleaudio.readthedocs.org/>`_",
     author='Joe Hamilton',
     author_email='jhamilton10@georgefox.edu',
     url='https://github.com/hamiltron/simpleaudio',
