@@ -7,9 +7,6 @@ import unittest
 
 class TestSimpleaudio(unittest.TestCase):
 
-    def test_lr(self):
-        fc.LeftRightCheck.run()
-
     def test_num_channels(self):
         self.assertRaises(ValueError, sa.play_buffer, b'\0'*16, 0, 2, 44100)
         self.assertRaises(ValueError, sa.play_buffer, b'\0'*16, 3, 2, 44100)
