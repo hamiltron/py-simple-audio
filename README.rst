@@ -9,17 +9,6 @@ MIT Licensed.
 `Documentation at RTFD <http://simpleaudio.readthedocs.org/>`_
 --------------------------------------------------------------
 
-Quick Function Check
---------------------
-
-.. code-block:: python
-
-   import simpleaudio.functionchecks as fc
-
-   fc.LeftRightCheck.run()
-   
-See documentation for more on function checks. 
-
 Installation
 ------------
 
@@ -29,6 +18,17 @@ your platform and Python version)::
    pip install simpleaudio
 
 See documentation for additional installation information.
+
+Quick Function Check
+--------------------
+
+.. code-block:: python
+
+   import simpleaudio.functionchecks as fc
+
+   fc.LeftRightCheck.run()
+
+See documentation for more on function checks.
 
 Simple Example
 --------------
