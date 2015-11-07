@@ -1,3 +1,5 @@
+.. _function-checks-ref:
+
 :mod:`simpleaudio.functionchecks`
 =================================
 

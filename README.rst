@@ -9,6 +9,17 @@ MIT Licensed.
 `Documentation at RTFD <http://simpleaudio.readthedocs.org/>`_
 --------------------------------------------------------------
 
+Quick Function Check
+--------------------
+
+.. code-block:: python
+
+   import simpleaudio.functionchecks as fc
+
+   fc.LeftRightCheck.run()
+   
+See documentation for more on function checks. 
+
 Installation
 ------------
 
@@ -30,5 +41,12 @@ Simple Example
    play_obj = wave_obj.play()
    play_obj.wait_done()
 
+Release Notes
+-------------
+
+1.0.0
+~~~~~
+
+Initial Release
 
 

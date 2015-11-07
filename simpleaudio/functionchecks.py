@@ -19,12 +19,15 @@ def _get_rates_and_channels():
                 file_list.append(name)
     return file_list
 
-def run_all(countdown=3):
+def _clean_docstring(docstring):
+    lines = [x.strip() for x in docstring.strip().splitlines()]
+    return '\n'.join(lines)
+
+def run_all(countdown=0):
     func_checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
                    StopCheck, StopAllCheck, IsPlayingCheck, WaitDoneCheck]
     for func_check in func_checks:
         func_check.run(countdown)
-
 
 class FunctionCheckBase(object):
     @classmethod
@@ -32,14 +35,14 @@ class FunctionCheckBase(object):
         raise NotImplementedError()
 
     @classmethod
-    def run(cls, countdown=0):
+    def run(cls, countdown=3):
         # print function check header
         print("")
         print("=" * 80)
         print("--", cls.__name__, "--")
-        print(cls.__doc__.strip())
-        print("=" * 80)
-
+        print(_clean_docstring(cls.__doc__))
+        print("")
+        
         if countdown > 0:
             print("Starting check in ...")
             for tick in reversed(range(1, countdown + 1)):
@@ -48,13 +51,12 @@ class FunctionCheckBase(object):
         print("RUNNING CHECK ...")
         cls._check()
         print("... DONE")
-
+        print("=" * 80)
 
 class LeftRightCheck(FunctionCheckBase):
     """
-    Checks stereo playback by first playing a note
-    in the left channel only, then a different note in the
-    right channel only.
+    Checks stereo playback by first playing a note in the left channel only,
+    then a different note in the right channel only.
     """
 
     @classmethod
@@ -66,8 +68,8 @@ class LeftRightCheck(FunctionCheckBase):
 
 class OverlappingCheck(FunctionCheckBase):
     """
-    Checks overlapped playback by playing three different notes
-    spaced approximately a half-second apart but still overlapping.
+    Checks overlapped playback by playing three different notes spaced
+    approximately a half-second apart but still overlapping.
     """
 
     @classmethod
@@ -85,8 +87,8 @@ class OverlappingCheck(FunctionCheckBase):
 
 class RatesAndChannelsCheck(FunctionCheckBase):
     """
-    Checks playback of mono and stereo audio at a subset
-    of allowed sample rates and bit-depths.
+    Checks playback of mono and stereo audio at a subset of allowed sample
+    rates and bit-depths.
     """
 
     @classmethod
@@ -103,9 +105,9 @@ class RatesAndChannelsCheck(FunctionCheckBase):
 
 class StopCheck(FunctionCheckBase):
     """
-    Checks stopping playback by playing three different
-    notes simultaneously and stopping two after approximately a half-second,
-    leaving only one note playing for two more seconds.
+    Checks stopping playback by playing three different notes simultaneously
+    and stopping two after approximately a half-second, leaving only one note
+    playing for two more seconds.
     """
 
     @classmethod
@@ -124,9 +126,8 @@ class StopCheck(FunctionCheckBase):
 
 class StopAllCheck(FunctionCheckBase):
     """
-    Checks stopping playback of all audio by playing three different
-    notes simultaneously and stopping all of them after approximately
-    a half-second.
+    Checks stopping playback of all audio by playing three different notes
+    simultaneously and stopping all of them after approximately a half-second.
     """
 
     @classmethod
@@ -144,10 +145,9 @@ class StopAllCheck(FunctionCheckBase):
 
 class IsPlayingCheck(FunctionCheckBase):
     """
-    Checks functionality of the is_playing() method by
-    calling during playback (when it should return True)
-    and calling it again after all playback has stopped
-    (when it should return False). The output is printed.
+    Checks functionality of the is_playing() method by calling during playback
+    (when it should return True) and calling it again after all playback has
+    stopped (when it should return False). The output is printed.
     """
 
     @classmethod
@@ -162,9 +162,9 @@ class IsPlayingCheck(FunctionCheckBase):
 
 class WaitDoneCheck(FunctionCheckBase):
     """
-    Checks functionality of the wait_done() method
-    by using it to allow the three-note clip to play
-    until finished (before attempting to stop playback).
+    Checks functionality of the wait_done() method by using it to allow the
+    three-note clip to play until finished (before attempting to stop
+    playback).
     """
 
     @classmethod

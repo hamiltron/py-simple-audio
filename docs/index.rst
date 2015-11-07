@@ -9,6 +9,17 @@ MIT Licensed.
 :ref:`installation-ref`
 -----------------------
 
+Quick Function Check
+--------------------
+
+.. code-block:: python
+
+   import simpleaudio.functionchecks as fc
+
+   fc.LeftRightCheck.run()
+   
+More on :ref:`function-checks-ref`. 
+
 Simple Example
 --------------
 

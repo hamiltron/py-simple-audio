@@ -4,6 +4,7 @@
 
 from setuptools import setup, Extension
 import sys
+from os import path
 
 platform_sources = []
 platform_libs = []
@@ -34,15 +35,17 @@ simpleaudio_c_ext = Extension(
 
 VERSION = "1.0.0"
 
+# Get the long description from the relevant file
+with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'), 
+    encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name='simpleaudio',
     version=VERSION,
     license='MIT',
-    description="The simplaudio package provides cross-platform, "
-                     "dependency-free audio playback "
-                     "capability for Python 3 on OSX, Windows, and Linux.",
-    long_description="`Documentation at RTFD "
-                     "<http://simpleaudio.readthedocs.org/>`_",
+    description="Simple, asynchronous audio playback for Python 3.",
+    long_description=long_description,
     author='Joe Hamilton',
     author_email='jhamilton10@georgefox.edu',
     url='https://github.com/hamiltron/simpleaudio',
