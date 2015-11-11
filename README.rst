@@ -41,12 +41,20 @@ Simple Example
    play_obj = wave_obj.play()
    play_obj.wait_done()
 
+Support
+-------
+
+For usage and how-to questions, post a question on 
+`StackOverflow <http://stackoverflow.com/>`_ 
+and tag it 'pysimpleaudio'. 
+
+For bug reports, please email simpleaudio.bugs@gmail.com.
+
 Release Notes
 -------------
 
-1.0.0
-~~~~~
+* 1.0.0
+  + Initial Release
 
-Initial Release
 
 
