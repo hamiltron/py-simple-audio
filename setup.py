@@ -36,7 +36,7 @@ simpleaudio_c_ext = Extension(
 VERSION = "1.0.0"
 
 # Get the long description from the relevant file
-with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'), 
+with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
     encoding='utf-8') as f:
     long_description = f.read()
 
@@ -64,4 +64,7 @@ setup(
     ext_modules=[simpleaudio_c_ext],
     packages=['simpleaudio'],
     package_dir={'simpleaudio': 'simpleaudio'},
-    package_data={'simpleaudio': ['test_audio/*.wav']},)
+    package_data={'simpleaudio': ['test_audio/c.wav', 'test_audio/e.wav',
+                                  'test_audio/g.wav',
+                                  'test_audio/left_right.wav',
+                                  'test_audio/notes_2_16_44.wav']},)

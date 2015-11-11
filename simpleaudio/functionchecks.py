@@ -10,22 +10,13 @@ AUDIO_DIR =  os.path.join(MODULE_PATH, "test_audio")
 def _gwo(wave_obj_file):
     return sa.WaveObject.from_wave_file(os.path.join(AUDIO_DIR, wave_obj_file))
 
-
-def _get_rates_and_channels():
-    file_list = []
-    for root, dirs, files in os.walk(AUDIO_DIR):
-        for name in files:
-            if re.match(r'notes_.*', name):
-                file_list.append(name)
-    return file_list
-
 def _clean_docstring(docstring):
     lines = [x.strip() for x in docstring.strip().splitlines()]
     return '\n'.join(lines)
 
 def run_all(countdown=0):
-    func_checks = [LeftRightCheck, OverlappingCheck, RatesAndChannelsCheck,
-                   StopCheck, StopAllCheck, IsPlayingCheck, WaitDoneCheck]
+    func_checks = [LeftRightCheck, OverlappingCheck, StopCheck, StopAllCheck, 
+                   IsPlayingCheck, WaitDoneCheck]
     for func_check in func_checks:
         func_check.run(countdown)
 
@@ -83,24 +74,6 @@ class OverlappingCheck(FunctionCheckBase):
         sleep(0.5)
         wave_obj_3.play()
         sleep(3)
-
-
-class RatesAndChannelsCheck(FunctionCheckBase):
-    """
-    Checks playback of mono and stereo audio at a subset of allowed sample
-    rates and bit-depths.
-    """
-
-    @classmethod
-    def _check(cls):
-        for wave_file in _get_rates_and_channels():
-            wave_obj = _gwo(wave_file)
-            try:
-                print("Playing ", wave_obj)
-                wave_obj.play()
-                sleep(4)
-            except Exception as e:
-                print("Error:", e.message)
 
 
 class StopCheck(FunctionCheckBase):
