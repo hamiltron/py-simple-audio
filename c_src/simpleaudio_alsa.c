@@ -144,7 +144,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     }
     audio_blob->buffer_size = buffer_frames * bytes_per_chan * num_channels;
 
-    dbg1("ALSA sayd buffer size is %d bytes\n", audio_blob->buffer_size);
+    dbg1("ALSA says buffer size is %d bytes\n", audio_blob->buffer_size);
 
     /* fire off the playback thread */
     result = pthread_create(&play_thread, NULL, playback_thread, (void*)audio_blob);
