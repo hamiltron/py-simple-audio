@@ -1,3 +1,4 @@
+recursive-include c_src *
 include simpleaudio/test_audio/c.wav
 include simpleaudio/test_audio/e.wav
 include simpleaudio/test_audio/g.wav
