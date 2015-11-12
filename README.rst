@@ -44,11 +44,24 @@ Simple Example
 Support
 -------
 
-For usage and how-to questions, post a question on 
+For usage and how-to questions, first checkout the tutorial in the 
+documentation. If you're still stuck, post a question on 
 `StackOverflow <http://stackoverflow.com/>`_ 
 and tag it 'pysimpleaudio'. 
 
 For bug reports, please email simpleaudio.bugs@gmail.com.
+
+Big Thanks To ...
+-----------------
+
+Jonas Kalderstam for 
+`his explanation <http://cowboyprogrammer.org/building-python-wheels-for-windows/>`_  
+of how to get Windows 64-bit builds working.
+
+Christophe Gohlke for his help getting Windows builds working for 3.5.
+
+Tom Christie for his awesome Python package 
+`distribution tutorial <https://tom-christie.github.io/articles/pypi/>`_. 
 
 Release Notes
 -------------
