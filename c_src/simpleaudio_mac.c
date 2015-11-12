@@ -13,7 +13,7 @@ MIT License (see LICENSE.txt)
 #define NUM_BUFS (2)
 
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
-    snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, code); \
+    snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, (int)code); \
     PyErr_SetString(sa_python_error, str_ptr);
 
 
