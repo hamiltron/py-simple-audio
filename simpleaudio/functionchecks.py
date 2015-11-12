@@ -146,3 +146,7 @@ class WaitDoneCheck(FunctionCheckBase):
         play_obj = wave_obj.play()
         play_obj.wait_done()
         play_obj.stop()
+
+
+if __name__ == "__main__":
+    run_all()

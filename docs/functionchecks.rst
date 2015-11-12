@@ -6,10 +6,13 @@
 .. module:: simpleaudio.functionchecks
    :synopsis: Provides tests of functionality by playing various test audio clips.
 
-The :mod:`~simpleaudio.functionchecks` module contains a number of classes that all inherit
-from :class:`FunctionCheckBase` which provides :meth:`~FunctionCheckBase.run()` class method common to
-all function checks. These may be run individually with :meth:`~FunctionCheckBase.run()`
-or all test may be run with :func:`run_all()`.
+The :mod:`~simpleaudio.functionchecks` module contains a number of classes 
+that all inherit from :class:`FunctionCheckBase` which provides 
+:meth:`~FunctionCheckBase.run()` class method common toall function checks. 
+These may be run individually with :meth:`~FunctionCheckBase.run()`
+or all test may be run with :func:`run_all()`. If the module is run from the
+command line using Python's ``-m`` flag, it will automatically run all 
+function checks. 
 
 API
 ---
@@ -40,10 +43,6 @@ API
 
    Checks overlapped playback by playing three different notes
    spaced approximately a half-second apart but still overlapping.
-
-.. class:: RatesAndChannelsCheck
-
-   Checks playback of mono and stereo audio at a subset of allowed sample rates and bit-depths.
 
 .. class:: StopCheck
 
