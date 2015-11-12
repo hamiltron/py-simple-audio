@@ -60,7 +60,7 @@ of how to get Windows 64-bit builds working.
 
 Christophe Gohlke for his help getting Windows builds working for 3.5.
 
-Tom Christie for his awesome Python package 
+Tom Christie for his extensive Python package 
 `distribution tutorial <https://tom-christie.github.io/articles/pypi/>`_. 
 
 Release Notes
