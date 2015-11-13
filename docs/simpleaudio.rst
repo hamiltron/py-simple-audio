@@ -49,8 +49,8 @@ API
 
 .. method:: PlayObject.is_playing()
 
-   Returns a :keyword:`True` if the playback job is still running or
-   :keyword:`False` if it has finished.
+   Returns true if the playback job is still running or
+   false if it has finished.
 
    :rtype: bool
 

@@ -13,7 +13,7 @@ Playing audio directly
 
 The simplest way to play audio is with :func:`~simpleaudio.play_buffer`. The
 ``audio_data`` parameter must be an object which supports the buffer interface.
-(:keyword:`bytes` objects, Python arrays, and Numpy arrays all qualify.)::
+(:class:`bytes` objects, Python arrays, and Numpy arrays all qualify.)::
 
    play_obj = sa.play_buffer(audio_data, 2, 2, 44100)
 
