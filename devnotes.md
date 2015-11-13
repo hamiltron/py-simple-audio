@@ -10,6 +10,15 @@
 * check for memory allocation failure and return errors
 * add external links (like pip & buffer protocol) to documentation
 
+## Build Options
+
+The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
+* `0` - Debug statements are disabled.
+* `1` - Turns on debug statements that aren't in the playback inner-loop/thread/callback 
+  (i.e. stuff that prints each time another chunk of audio is buffered). 
+* `2` - Turns on all debug statements. This will spew continually while the audio is playing and may 
+  cause dropouts due to time spent in print subroutines.  
+
 ## Tag-Release Cycle
 
 1. update docs
