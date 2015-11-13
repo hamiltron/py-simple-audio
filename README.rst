@@ -47,7 +47,7 @@ Support
 For usage and how-to questions, first checkout the tutorial in the
 documentation. If you're still stuck, post a question on
 `StackOverflow <http://stackoverflow.com/>`_
-and tag it 'pysimpleaudio'.
+and **tag it 'pysimpleaudio'**.
 
 For bug reports, please email simpleaudio.bugs@gmail.com.
 
