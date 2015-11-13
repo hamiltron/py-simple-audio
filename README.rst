@@ -63,6 +63,8 @@ Christophe Gohlke for his help getting Windows builds working for 3.5.
 Tom Christie for his extensive Python package
 `distribution tutorial <https://tom-christie.github.io/articles/pypi/>`_.
 
+Many others for their contributions, documentation, examples, and more.
+
 Release Notes
 -------------
 
