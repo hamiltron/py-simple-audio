@@ -9,7 +9,7 @@
 * look into possible handle/memrory leaks upon Win or ALSA errors
 * check for memory allocation failure and return errors
 * add external links (like pip & buffer protocol) to documentation
-
+    
 ## Build Options
 
 The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
@@ -31,8 +31,8 @@ The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
 6. tag latest commit
 7. build RTD docs
 8. build distributions for Python 3.3, 3.4, 3.5
-  * linux - sdist
-  * osx - build and modify wheels to work on all versions
+  * linux (sdist)
+  * osx 
   * windows
 9. push to PyPI
 
@@ -41,6 +41,8 @@ The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
 [VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
 
 [Super handy info on Windows builds](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
+
+Use VS 2015 Community edition for 3.5 (32 and 64 bit) builds. Select the C++ tools for installation. 
 
 ## Distribution Stuff
 
