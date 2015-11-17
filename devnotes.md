@@ -9,7 +9,7 @@
 * look into possible handle/memrory leaks upon Win or ALSA errors
 * check for memory allocation failure and return errors
 * add external links (like pip & buffer protocol) to documentation
-    
+      
 ## Build Options
 
 The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.

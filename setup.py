@@ -27,7 +27,7 @@ else:
 
 simpleaudio_c_ext = Extension(
     'simpleaudio._simpleaudio',
-    sources=platform_sources+['c_src/simpleaudio.c'],
+    sources=platform_sources + ['c_src/simpleaudio.c'],
     libraries=platform_libs,
     extra_compile_args=platform_compile_args,
     extra_link_args=platform_link_args,
@@ -37,7 +37,7 @@ VERSION = "1.0.0rc1"
 
 # Get the long description from the relevant file
 with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
-    encoding='utf-8') as f:
+          encoding='utf-8') as f:
     long_description = f.read()
 
 setup(

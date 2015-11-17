@@ -5,20 +5,24 @@ from time import sleep
 import re
 
 MODULE_PATH = os.path.dirname(__file__)
-AUDIO_DIR =  os.path.join(MODULE_PATH, "test_audio")
+AUDIO_DIR = os.path.join(MODULE_PATH, "test_audio")
+
 
 def _gwo(wave_obj_file):
     return sa.WaveObject.from_wave_file(os.path.join(AUDIO_DIR, wave_obj_file))
+
 
 def _clean_docstring(docstring):
     lines = [x.strip() for x in docstring.strip().splitlines()]
     return '\n'.join(lines)
 
+
 def run_all(countdown=0):
-    func_checks = [LeftRightCheck, OverlappingCheck, StopCheck, StopAllCheck, 
+    func_checks = [LeftRightCheck, OverlappingCheck, StopCheck, StopAllCheck,
                    IsPlayingCheck, WaitDoneCheck]
     for func_check in func_checks:
         func_check.run(countdown)
+
 
 class FunctionCheckBase(object):
     @classmethod
@@ -33,7 +37,7 @@ class FunctionCheckBase(object):
         print("--", cls.__name__, "--")
         print(_clean_docstring(cls.__doc__))
         print("")
-        
+
         if countdown > 0:
             print("Starting check in ...")
             for tick in reversed(range(1, countdown + 1)):
@@ -43,6 +47,7 @@ class FunctionCheckBase(object):
         cls._check()
         print("... DONE")
         print("=" * 80)
+
 
 class LeftRightCheck(FunctionCheckBase):
     """

@@ -1,6 +1,6 @@
-/* 
+/*
 Simpleaudio Python Extension
-Copyright (C) 2015, Joe Hamilton 
+Copyright (C) 2015, Joe Hamilton
 MIT License (see LICENSE.txt)
 */
 
@@ -10,7 +10,7 @@ MIT License (see LICENSE.txt)
 
 void* create_mutex() {
   void* mutex;
-  mutex = (void*)CreateMutex(NULL, FALSE, NULL);  
+  mutex = (void*)CreateMutex(NULL, FALSE, NULL);
   return mutex;
 }
 
