@@ -48,7 +48,7 @@ setup(
     long_description=long_description,
     author='Joe Hamilton',
     author_email='jhamilton10@georgefox.edu',
-    url='https://github.com/hamiltron/simpleaudio',
+    url='https://github.com/hamiltron/py-simple-audio',
     keywords=['audio', 'wave', 'media', 'multimedia',
               'sound', 'alsa', 'coreaudio', 'winmm', 'music'],
     classifiers=['License :: OSI Approved :: MIT License',
