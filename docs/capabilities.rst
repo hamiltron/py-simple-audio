@@ -43,3 +43,13 @@ The following sample rates are allowed (though not necessarily gauranteed
 to be supported on your platform/hardware): 8, 11.025, 16, 22.05, 32, 44.1,
 48, 88.2, 96, and 192 kHz.
 
+Comparison to PyAudio
+---------------------
+
+`PyAudio <https://pypi.python.org/pypi/PyAudio>`_ is another cross-platform
+audio library for Python. While it has more capability than simpleaudio,
+such as recording and continuous audio streaming, it depends on having
+`PortAudio <http://www.portaudio.com/>`_ which makes for a more complicated
+installation. Simpleaudio is intended to be one-stop shopping for a
+cross-platform audio interface intended for sound clip playback.
+
