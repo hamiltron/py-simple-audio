@@ -112,5 +112,5 @@ Here is a full example that plays a few sinewave notes in succession::
    # start playback
    play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
 
-   # wait for it to finish before exiting
+   # wait for playback to finish before exiting
    play_obj.wait_done()
