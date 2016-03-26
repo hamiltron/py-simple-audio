@@ -89,7 +89,7 @@ Playing a Wave_read object::
    import simpleaudio as sa
    import wave
 
-   wave_read = wave.open(path_to_file, 'rb)
+   wave_read = wave.open(path_to_file, 'rb')
    wave_obj = sa.WaveObject.from_wave_read(wave_read)
    play_obj = wave_obj.play()
    play_obj.wait_done()
@@ -99,8 +99,8 @@ Playing an object supporting the buffer interface::
    import simpleaudio as sa
    import wave
 
-   wave_read = wave.open(path_to_file, 'rb)
-   audio _data = wave_read.readframes(wave_read.getnframes())
+   wave_read = wave.open(path_to_file, 'rb')
+   audio_data = wave_read.readframes(wave_read.getnframes())
    num_channels = wave_read.getnchannels()
    bytes_per_sample = wave_read.getsampwidth()
    sample_rate = wave_read.getframerate()
@@ -114,11 +114,11 @@ Play an object directly (without creating a :class:`WaveObject`)::
    import simpleaudio as sa
    import wave
 
-   wave_read = wave.open(path_to_file, 'rb)
-   audio _data = wave_read.readframes(wave_read.getnframes())
+   wave_read = wave.open(path_to_file, 'rb')
+   audio_data = wave_read.readframes(wave_read.getnframes())
    num_channels = wave_read.getnchannels()
    bytes_per_sample = wave_read.getsampwidth()
    sample_rate = wave_read.getframerate()
 
-   play_obj = play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate)
+   play_obj = sa.play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate)
    play_obj.wait_done()
