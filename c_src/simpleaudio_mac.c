@@ -93,7 +93,11 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     memset(&audio_fmt, 0, sizeof(audio_fmt));
     audio_fmt.mSampleRate = sample_rate;
     audio_fmt.mFormatID = kAudioFormatLinearPCM;
-    audio_fmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    audio_fmt.mFormatFlags = kAudioFormatFlagIsPacked;
+    if (bytes_per_chan >= 2) {
+      /* don't set the signed flag for 8-bit audio */
+      audio_fmt.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
+    }
     audio_fmt.mFramesPerPacket = 1;
     audio_fmt.mChannelsPerFrame = num_channels;
     audio_fmt.mBytesPerFrame = bytesPerFrame;
@@ -139,4 +143,3 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
 }
-

@@ -87,7 +87,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     /* set that format appropriately */
     if (bytes_per_chan == 1) {
-
+        sample_format = SND_PCM_FORMAT_U8;
     } else if (bytes_per_chan == 2) {
         sample_format = SND_PCM_FORMAT_S16_LE;
     } else {
@@ -157,4 +157,3 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
 }
-
