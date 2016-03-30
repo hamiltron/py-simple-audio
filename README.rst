@@ -49,7 +49,9 @@ documentation. If you're still stuck, post a question on
 `StackOverflow <http://stackoverflow.com/>`_
 and **tag it 'pysimpleaudio'**.
 
-For bug reports, please email simpleaudio.bugs@gmail.com.
+For bug reports, please create an
+`issue on Github <https://github.com/hamiltron/py-simple-audio/issues>`_
+or email simpleaudio.bugs@gmail.com.
 
 Big Thanks To ...
 -----------------
@@ -71,6 +73,3 @@ Release Notes
 * 1.0.0
 
    * Initial Release
-
-
-
