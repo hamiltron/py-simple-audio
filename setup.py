@@ -33,7 +33,7 @@ simpleaudio_c_ext = Extension(
     extra_link_args=platform_link_args,
     define_macros=[('DEBUG', '0')])
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 # Get the long description from the relevant file
 with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
