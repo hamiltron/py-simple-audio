@@ -34,7 +34,7 @@ before playback.
 Audio Formats
 -------------
 
-Simpleaudio supports standard signed-integer, little-endian formats - basically
+Simpleaudio supports standard integer PCM formats - basically
 what is usually contained in a **plain WAV file**.
 
 Mono (1-channel) and stereo (2-channel) audio is supported.
@@ -52,4 +52,3 @@ such as recording and continuous audio streaming, it depends on having
 `PortAudio <http://www.portaudio.com/>`_ which makes for a more complicated
 installation. Simpleaudio is intended to be one-stop shopping for a
 cross-platform audio interface intended for sound clip playback.
-
