@@ -37,7 +37,7 @@ useful when a script or program would otherwise exit before playback is done
    # script exit
 
 
-WaveObject's
+WaveObjects
 ------------
 
 In order to facilitate cleaner code, the :class:`~simpleaudio.WaveObject` 
