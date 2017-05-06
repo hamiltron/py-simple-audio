@@ -17,8 +17,8 @@ Quick Function Check
    import simpleaudio.functionchecks as fc
 
    fc.LeftRightCheck.run()
-   
-More on :ref:`function-checks-ref`. 
+
+More on :ref:`function-checks-ref`.
 
 Simple Example
 --------------
@@ -42,3 +42,4 @@ Contents
    tutorial
    simpleaudio
    functionchecks
+   releases

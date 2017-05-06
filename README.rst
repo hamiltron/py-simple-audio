@@ -6,7 +6,7 @@ capability for Python 3 on OSX, Windows, and Linux.
 
 MIT Licensed.
 
-`Documentation at RTFD <http://simpleaudio.readthedocs.org/>`_
+`Documentation at RTFD <http://simpleaudio.readthedocs.io/>`_
 --------------------------------------------------------------
 
 Installation
@@ -56,24 +56,7 @@ or email simpleaudio.bugs@gmail.com.
 Big Thanks To ...
 -----------------
 
-Jonas Kalderstam for
-`his explanation <http://cowboyprogrammer.org/building-python-wheels-for-windows/>`_
-of how to get Windows 64-bit builds working.
-
-Christophe Gohlke for his help getting Windows builds working for 3.5.
-
-Tom Christie for his extensive Python package
-`distribution tutorial <https://tom-christie.github.io/articles/pypi/>`_.
-
+Jonas Kalderstam
+Christophe Gohlke
+Tom Christie
 Many others for their contributions, documentation, examples, and more.
-
-Release Notes
--------------
-
-* 1.0.1
-
-   * Fixed OSX and Linux 8-bit playback
-
-* 1.0.0
-
-   * Initial Release

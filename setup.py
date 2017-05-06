@@ -5,6 +5,7 @@
 from setuptools import setup, Extension
 import sys
 from os import path
+from git import Repo
 
 platform_sources = []
 platform_libs = []

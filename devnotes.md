@@ -40,13 +40,15 @@ The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
 
 [VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
 
-[Super handy info on Windows builds](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
+[Super handy info on Windows builds, by Jonas Kalderstam](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
+
+Christophe Gohlke knows how to get Windows builds working for 3.5
 
 Use VS 2015 Community edition for 3.5 (32 and 64 bit) builds. Select the C++ tools for installation.
 
 ## Distribution Stuff
 
-[amazing](https://tom-christie.github.io/articles/pypi/)
+[amazing package distribution tutorial, by Tom Christie](https://tom-christie.github.io/articles/pypi/)
 
 [package_data reference](https://docs.python.org/3.5/distutils/setupscript.html)
 
