@@ -43,7 +43,7 @@ tag_commit = str(latest_tag.commit)
 
 VERSION = str(latest_tag)
 if latest_commit != tag_commit:
-    VERSION = VERSION + "-" + latest_commit[:6]
+    VERSION = VERSION + "." + latest_commit[:6]
 
 # Get the long description from the relevant file
 with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
