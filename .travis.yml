@@ -5,4 +5,4 @@ matrix:
   - os: linux
     python: '3.6'
     install: 'python3 setup.py sdist'
-script: true
+script: 'echo "👍"'
