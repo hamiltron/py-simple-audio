@@ -57,6 +57,9 @@ Big Thanks To ...
 -----------------
 
 Jonas Kalderstam
+
 Christophe Gohlke
+
 Tom Christie
+
 Many others for their contributions, documentation, examples, and more.
