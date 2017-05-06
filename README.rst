@@ -51,7 +51,7 @@ and **tag it 'pysimpleaudio'**.
 
 For bug reports, please create an
 `issue on Github <https://github.com/hamiltron/py-simple-audio/issues>`_
-or email simpleaudio.bugs@gmail.com.
+.
 
 Big Thanks To ...
 -----------------
