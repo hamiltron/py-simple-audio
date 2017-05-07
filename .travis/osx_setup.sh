@@ -3,9 +3,9 @@
 set -e
 set -x
 
-brew update
 brew upgrade pyenv
 pyenv install -s $PYENV_VERSION
+eval "$(pyenv init -)"
 
 python -V
 pip -V
