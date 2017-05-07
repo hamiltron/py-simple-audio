@@ -9,7 +9,7 @@ matrix:
     language: objective-c
     env: PYENV_VERSION=3.3.6
     before_install: './.travis/osx_setup.sh'
-    install: 'python setup.py bdist_wheel'
+    install: './.travis/osx_install.sh'
 script: 'echo "👍"'
 #deploy:
 #  - provider: pypi
