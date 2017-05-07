@@ -8,7 +8,7 @@ matrix:
   - os: osx
     env: PYENV_VERSION=3.3
     before_install: './.travis/osx_setup.sh'
-    install: 'python3 setup.py bist_wheel'
+    install: 'python3 setup.py bdist_wheel'
 script: 'echo "👍"'
 #deploy:
 #  - provider: pypi
