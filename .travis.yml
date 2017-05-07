@@ -7,9 +7,9 @@ matrix:
 #    before_install: 'pip install GitPython'
   - os: osx
     language: objective-c
-    env: PYENV_VERSION=3.3
+    env: PYENV_VERSION=3.3.6
     before_install: './.travis/osx_setup.sh'
-    install: 'python3 setup.py bdist_wheel'
+    install: 'python setup.py bdist_wheel'
 script: 'echo "👍"'
 #deploy:
 #  - provider: pypi
