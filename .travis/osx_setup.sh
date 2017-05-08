@@ -10,4 +10,5 @@ eval "$(pyenv init)"
 python -V
 pip -V
 
-pip install GitPython
+pip install --upgrade pip
+pip install --upgrade GitPython wheel setuptools 
