@@ -76,9 +76,22 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     static char *device = "default";
     snd_pcm_format_t sample_format;
     pthread_t play_thread;
+    pthread_attr_t thread_attr;
     int result;
     snd_pcm_hw_params_t* hw_params;
     snd_pcm_uframes_t buffer_frames;
+
+    /* set detachable thread attribute */
+    result = pthread_attr_init(&thread_attr);
+    if (result != 0) {
+        ALSA_EXCEPTION("Error initializing thread attributes.", result, "", err_msg_buf);
+        return NULL;
+    }
+    result = pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+    if (result != 0) {
+        ALSA_EXCEPTION("Error setting detachable thread attribute.", result, "", err_msg_buf);
+        return NULL;
+    }
 
     /* not sure where the best place to do this is or if it matters */
     snd_pcm_hw_params_alloca(&hw_params);
@@ -147,7 +160,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     dbg1("ALSA says buffer size is %d bytes\n", audio_blob->buffer_size);
 
     /* fire off the playback thread */
-    result = pthread_create(&play_thread, NULL, playback_thread, (void*)audio_blob);
+    result = pthread_create(&play_thread, &thread_attr, playback_thread, (void*)audio_blob);
     if (result != 0) {
         ALSA_EXCEPTION("Could not create playback thread.", result, "", err_msg_buf);
         snd_pcm_close(audio_blob->handle);
