@@ -17,12 +17,12 @@ matrix:
     install: './.travis/osx_install.sh'
   - os: osx
     language: objective-c
-    env: PYENV_VERSION=3.5.3
+    env: PYENV_VERSION=3.5.2
     before_install: './.travis/osx_setup.sh'
     install: './.travis/osx_install.sh'
   - os: osx
     language: objective-c
-    env: PYENV_VERSION=3.6.1
+    env: PYENV_VERSION=3.6-dev
     before_install: './.travis/osx_setup.sh'
     install: './.travis/osx_install.sh'
 script: 'echo "👍"'
