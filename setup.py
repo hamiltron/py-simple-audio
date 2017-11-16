@@ -5,7 +5,6 @@
 from setuptools import setup, Extension
 import sys
 from os import path
-from git import Repo
 
 platform_sources = []
 platform_libs = []
@@ -36,17 +35,7 @@ simpleaudio_c_ext = Extension(
 
 # attempt to generate the version from git tag and commit
 
-repo = Repo()
-latest_commit = str(repo.head.commit)
-latest_tag = repo.tags[-1]
-tag_commit = str(latest_tag.commit)
-
-VERSION = str(latest_tag)
-if latest_commit != tag_commit:
-    untagged = list(
-        repo.iter_commits("{}..{}".format(tag_commit, latest_commit)))
-    commit_count = str(len(untagged))
-    VERSION = VERSION + "." + commit_count
+VERSION = "1.0.1.1"
 
 # Get the long description from the relevant file
 with open(path.join(path.abspath(path.dirname(__file__)), 'README.rst'),

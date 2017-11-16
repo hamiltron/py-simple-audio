@@ -151,7 +151,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
        SEE :http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx
     */
     thread_handle = CreateThread(NULL, 0, bufferThread, audio_blob, 0, &thread_id);
-    if (thread_handle == NULL) {
+    if (thread_handle != NULL) {
+        /* Close so we don't leak handles - similar to detatched POSIX threads */
+        CloseHandle(thread_handle);
+    } else {
         DWORD lastError = GetLastError();
         /* lang code : US En */
         FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL, lastError, 0x0409, sys_msg_buf, SYS_STR_LEN, NULL);
@@ -195,4 +198,3 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
 
     return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
 }
-
