@@ -5,20 +5,20 @@ matrix:
 #    python: '3.6'
 #    before_install: './.travis/linux_setup.sh'
 #    install: './.travis/linux_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PYENV_VERSION=3.3.6
-#    before_install: './.travis/osx_setup.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.3.5
+    before_install: './.travis/osx_setup.sh'
+    install: './.travis/osx_install.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.4.4
+    before_install: './.travis/osx_setup.sh'
 #    install: './.travis/osx_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PYENV_VERSION=3.4.4
-#    before_install: './.travis/osx_setup.sh'
-#    install: './.travis/osx_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PYENV_VERSION=3.5.2
-#    before_install: './.travis/osx_setup.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.5.3
+    before_install: './.travis/osx_setup.sh'
 #    install: './.travis/osx_install.sh'
   - os: osx
     language: objective-c
