@@ -3,12 +3,10 @@
 set -e
 set -x
 
-brew upgrade pyenv
-pyenv install -s $PYENV_VERSION
-eval "$(pyenv init -)"
+curl -O https://www.python.org/ftp/python/${PY_VER}/python-${PY_VER}-macosx10.6.pkg
 
-python -V
-pip -V
-
-pip install --upgrade pip
-pip install --upgrade GitPython wheel setuptools
+#python -V
+#pip -V
+#
+#pip install --upgrade pip
+#pip install --upgrade wheel setuptools
