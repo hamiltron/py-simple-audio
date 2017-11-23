@@ -5,7 +5,8 @@ set -x
 
 curl https://www.python.org/ftp/python/3.3.5/python-3.3.5-macosx10.5.dmg -o pyinstall.dmg
 hdiutil attach -mountpoint ./installmount pyinstall.dmg
-spctl --master-disable
+
+# currently, this step fails
 sudo installer -package ./installmount/Python.mpkg -target /
 
 which python3
