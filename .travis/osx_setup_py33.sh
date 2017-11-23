@@ -8,8 +8,12 @@ hdiutil attach -mountpoint ./installmount pyinstall.dmg
 sudo installer -package ./installmount/Python.mpkg -target /
 
 which python3
-which pip3
 python3 -V
+
+curl https://bootstrap.pypa.io/get-pip.py -O
+python3 get-pip.py
+
+which pip3
 pip3 -V
 
 pip3 install --upgrade pip
