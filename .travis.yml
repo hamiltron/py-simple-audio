@@ -4,24 +4,29 @@ matrix:
     language: python
     python: '3.6'
     before_install:
-      - './.travis/linux_setup.sh'
-        './.travis/second_file.sh'
-    install: './.travis/linux_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.4.4
-#    before_install: './.travis/osx_setup.sh'
-#    install: './.travis/osx_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.5.4
-#    before_install: './.travis/osx_setup.sh'
-#    install: './.travis/osx_install.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.6.3
-#    before_install: './.travis/osx_setup.sh'
-#    install: './.travis/osx_install.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/linux_build.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.4.4
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.5.4
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.6.3
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
 script: 'echo "👍"'
 #deploy:
 #  - provider: pypi
