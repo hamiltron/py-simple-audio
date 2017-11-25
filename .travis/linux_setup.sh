@@ -3,12 +3,12 @@
 set -e
 set -x
 
-which python
-which pip
-python -V
-pip -V
+which python3
+which pip3
+python3 -V
+pip3 -V
 
-pip install --upgrade pip
-pip install --upgrade wheel setuptools twine pycodestyle
+pip3 install --upgrade pip
+pip3 install --upgrade wheel setuptools twine pycodestyle
 
 which pycodestyle

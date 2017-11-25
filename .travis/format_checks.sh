@@ -9,7 +9,7 @@ then
     exit 1
 fi
 
-pep8_files=`find . | grep -E "\\.py$" | xargs -n 1 pep8 --ignore=E265`
+pep8_files=`find . | grep -E "\\.py$" | xargs -n 1 pycodestyle --ignore=E265`
 
 if [ "$pep8_files" != "" ]
 then
