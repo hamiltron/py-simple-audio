@@ -5,7 +5,7 @@ matrix:
     python: '3.6'
     before_install:
       - './.travis/linux_setup.sh'
-      - './.travis/second_file.sh'
+        './.travis/second_file.sh'
     install: './.travis/linux_install.sh'
 #  - os: osx
 #    language: objective-c
