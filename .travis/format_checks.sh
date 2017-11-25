@@ -1,5 +1,8 @@
 #!/bin/bash
 
+pip3 install --upgrade wheel setuptools twine pycodestyle
+which pycodestyle
+
 ws_files=`find . | grep -E "\\.(py|c)$" | xargs -n 1 grep --files-with-matches -E "\\s$"`
 
 if [ "$ws_files" != "" ]

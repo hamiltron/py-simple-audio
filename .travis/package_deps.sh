@@ -9,6 +9,4 @@ python3 -V
 pip3 -V
 
 pip3 install --upgrade pip
-pip3 install --upgrade wheel setuptools twine pycodestyle
-
-which pycodestyle
+pip3 install --upgrade wheel setuptools twine
