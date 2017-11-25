@@ -4,6 +4,7 @@ matrix:
     language: python
     python: '3.6'
     before_install:
+      - './.travis/alsa_deps.sh'
       - './.travis/package_deps.sh'
     install: './.travis/linux_build.sh'
     script:
