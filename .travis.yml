@@ -13,40 +13,36 @@ matrix:
     script:
       - 'python3 setup.py test'
       - './.travis/format_checks.sh'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.4.4
-#    before_install:
-#      - './.travis/osx_install_py3.sh'
-#      - './.travis/package_deps.sh'
-#    install: './.travis/osx_build.sh'
-#    script:
-#      - 'python3 setup.py test'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.5.4
-#    before_install:
-#      - './.travis/osx_install_py3.sh'
-#      - './.travis/package_deps.sh'
-#    install: './.travis/osx_build.sh'
-#    script:
-#      - 'python3 setup.py test'
-#  - os: osx
-#    language: objective-c
-#    env: PY_VER=3.6.3
-#    before_install:
-#      - './.travis/osx_install_py3.sh'
-#      - './.travis/package_deps.sh'
-#    install: './.travis/osx_build.sh'
-#    script:
-#      - 'python3 setup.py test'
-#script: 'echo "👍"'
-#deploy:
-#  - provider: pypi
-#    server: https://testpypi.python.org/pypi
-#    skip_upload_docs: true
-#    user: "hamiltron"
-#    password:
-#      secure:  "v3FkSaaw1KfimhsxOrlohJy/BuBwvgnzjZaxVkyCIVRq7QCC5fePlfXD44HvUsTgZzTLNNaRTHh09c9XN+d/36Gfc38hoiSFi6YpeVpVjPebM/jc/3hwhu5iQBp1WQ8Vw0tstxx/QQgRINqY/NW5463/vxG5Kc8LLmo8linz3Ti7FLTpyiL82XxcsF2U7KePEm+01dx6UTve0v5lnk4Q/4R0tys6YVozjt0H3GTO5+AgFJTpLDdIEgIRMTk2D7VxC+TanUDivPt5lgtJTOv7kk7LOfy5L8loVPZY6WPMPtkE2cm99QdfLyODqsVQ6DWQKTjOB/AbRCWQ11J+R9dYsKDbZXthfb2v2x32cxjZB8CK7pzsAOHbJKM+hUksM+4ikJ7xmVvl2oEVnhOoRjarIzVR2z75xifIdKNcnw+SqkAptAbGCYzacob3DWBqBC13MSuatRqTAjIMUFI3Nt+hsoqg/DqHknVf6TaIwGnUqYdy9VliQGVW8650kL+ZQoWgkxxOI4wjQJPdtRvY0hQNC9D5AFG7kGDHWHhEz1CNweTyUWd2UY2Rx7xdiU+V5ZYefHMSdnaqtw4YvoffBiHyGCR8YRZ3G5RtlJwP3TRArWTn6XHL2Sj95LAcIFebb6hfAj3D1H8VSwF6jqdSMJ7MCBydzeJpUUliYxcv9lflUjU="
-#    on:
-#      branch: master
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.4.4
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
+    script:
+      - 'python3 setup.py test'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.5.4
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
+    script:
+      - 'python3 setup.py test'
+  - os: osx
+    language: objective-c
+    env: PY_VER=3.6.3
+    before_install:
+      - './.travis/osx_install_py3.sh'
+      - './.travis/package_deps.sh'
+    install: './.travis/osx_build.sh'
+    script:
+      - 'python3 setup.py test'
+deploy:
+  - provider: script
+    script: './.travis/deploy.sh'
+    on:
+      branch: travis
+      tags: true
