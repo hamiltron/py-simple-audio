@@ -42,6 +42,7 @@ matrix:
       - 'python3 setup.py test'
 deploy:
   - provider: script
+    skip_cleanup: true
     script: './.travis/deploy.sh'
     on:
       branch: travis
