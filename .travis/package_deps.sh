@@ -11,8 +11,8 @@ pip3 -V
 pip3 install --upgrade pip
 pip3 install --upgrade wheel setuptools twine
 
-which twine
-
 echo "----------------------------------"
 echo $PATH
 echo "----------------------------------"
+
+which twine
