@@ -1,36 +1,36 @@
 matrix:
   include:
-  - os: linux
-    addons:
-      apt:
-        packages:
-        - libasound2-dev
-    language: python
-    python: '3.6'
-    before_install:
-      - './.travis/package_deps.sh'
-    install: './.travis/linux_build.sh'
-    script:
-      - 'python3 setup.py test'
-      - './.travis/format_checks.sh'
-  - os: osx
-    language: objective-c
-    env: PY_VER=3.4.4
-    before_install:
-      - './.travis/osx_install_py3.sh'
-      - './.travis/package_deps.sh'
-    install: './.travis/osx_build.sh'
-    script:
-      - 'python3 setup.py test'
-  - os: osx
-    language: objective-c
-    env: PY_VER=3.5.4
-    before_install:
-      - './.travis/osx_install_py3.sh'
-      - './.travis/package_deps.sh'
-    install: './.travis/osx_build.sh'
-    script:
-      - 'python3 setup.py test'
+#  - os: linux
+#    addons:
+#      apt:
+#        packages:
+#        - libasound2-dev
+#    language: python
+#    python: '3.6'
+#    before_install:
+#      - './.travis/package_deps.sh'
+#    install: './.travis/linux_build.sh'
+#    script:
+#      - 'python3 setup.py test'
+#      - './.travis/format_checks.sh'
+#  - os: osx
+#    language: objective-c
+#    env: PY_VER=3.4.4
+#    before_install:
+#      - './.travis/osx_install_py3.sh'
+#      - './.travis/package_deps.sh'
+#    install: './.travis/osx_build.sh'
+#    script:
+#      - 'python3 setup.py test'
+#  - os: osx
+#    language: objective-c
+#    env: PY_VER=3.5.4
+#    before_install:
+#      - './.travis/osx_install_py3.sh'
+#      - './.travis/package_deps.sh'
+#    install: './.travis/osx_build.sh'
+#    script:
+#      - 'python3 setup.py test'
   - os: osx
     language: objective-c
     env: PY_VER=3.6.3
