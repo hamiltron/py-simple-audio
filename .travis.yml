@@ -47,3 +47,6 @@ deploy:
     on:
       branch: travis
       tags: true
+
+notifications:
+  email: false
