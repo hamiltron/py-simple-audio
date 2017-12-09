@@ -8,5 +8,4 @@ sudo installer -package pyinstall.pkg -target /
 
 # symlink for twine
 PY_VER_SHORT=$(echo $PY_VER | sed -E "s/([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]+/\1/")
-
-ls -s /Library/Frameworks/Python.framework/Versions/$PY_VER_SHORT/bin/twine /usr/local/bin/twine
+ln -s /Library/Frameworks/Python.framework/Versions/$PY_VER_SHORT/bin/twine /usr/local/bin/twine
