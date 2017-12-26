@@ -1,6 +1,6 @@
 environment:
   TWINE_PASSWORD:
-    secure: fWQqBe+LX0RZ6F5XOmqzrw==
+    secure: 6vyZYm5TvgSek4Q34DdXzw==
 
   matrix:
     - PYTHON: "C:\\Python34"

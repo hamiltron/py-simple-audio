@@ -3,4 +3,4 @@
 set -e
 set -x
 
-twine upload -u hamiltron --repository-url https://test.pypi.org/legacy/ dist/*
+twine upload -u hamiltron dist/*
