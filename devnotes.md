@@ -18,38 +18,19 @@ The `DEBUG` macro value (as set in *setup.py*) is used to turn on debug prints.
   (i.e. stuff that prints each time another chunk of audio is buffered).
 * `2` - Turns on all debug statements. This will spew continually while the audio is playing and may
   cause dropouts due to time spent in print subroutines.  
+  
+## CI Notes
 
-## Tag-Release Cycle
-
-1. update docs
-2. update version strings
-  1. docs/conf.py
-  2. setup.py
-3. run PEP8 check
-4. build and run function checks on 3 platforms
-5. update release notes
-6. tag latest commit
-7. build RTD docs
-8. build distributions for Python 3.3, 3.4, 3.5
-  * linux (sdist)
-  * osx
-  * windows
-9. push to PyPI
-
-## Windows Builds
-
-[VS 2010 Link](http://download.microsoft.com/download/1/E/5/1E5F1C0A-0D5B-426A-A603-1798B951DDAE/VS2010Express1.iso)
-
-[Super handy info on Windows builds, by Jonas Kalderstam](http://cowboyprogrammer.org/building-python-wheels-for-windows/)
-
-Christophe Gohlke knows how to get Windows builds working for 3.5
-
-Use VS 2015 Community edition for 3.5 (32 and 64 bit) builds. Select the C++ tools for installation.
-
-## Distribution Stuff
-
-[amazing package distribution tutorial, by Tom Christie](https://tom-christie.github.io/articles/pypi/)
-
-[package_data reference](https://docs.python.org/3.5/distutils/setupscript.html)
-
-[OSX Wheel tags breakdown and info](https://github.com/MacPython/wiki/wiki/Spinning-wheels)
+* Deploy is attempted only on tagged commits. Ideally it would also be
+  only from the 'master' branch but AppVeyor doesn't support this so they're
+  both setup to be consistent.
+* PR Builds Disabled
+  * Travis: Disabled in repo settings
+  * Excluded PR notifications from the Github webhook
+* Twine Creds
+  * Travis: Set in project settings
+  * AppVeyor: Encrypted and put in yml file
+  encrypted and put in yml file
+* Email Notifications
+  * Travis: Disabled in yml file
+  * AppVeyor: Disabled in account settings

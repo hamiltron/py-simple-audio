@@ -1,0 +1,29 @@
+environment:
+  TWINE_PASSWORD:
+    secure: fWQqBe+LX0RZ6F5XOmqzrw==
+
+  matrix:
+    - PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python34-x64"
+      DISTUTILS_USE_SDK: "1"
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python --version"
+  - "pip3 install --upgrade pip"
+  - "pip3 install --upgrade wheel setuptools twine"
+
+build: off
+
+test_script:
+  - "appveyor/build.cmd %PYTHON%\\python.exe setup.py test"
+
+after_test:
+  - "appveyor/build.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
+
+deploy_script:
+  - "appveyor/deploy.cmd"
