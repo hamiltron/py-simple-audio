@@ -1,8 +1,9 @@
 @echo off
 
-echo "deploy script"
-echo "%APPVEYOR_REPO_TAG%"
+ECHO "deploy script..."
 
-IF "%APPVEYOR_REPO_TAG%"=="True" (
+IF "%APPVEYOR_REPO_TAG%"=="true" (
   ECHO "Tagged commit - attempting deploy"
+) ELSE (
+  ECHO "No tag, skipping deploy"
 )
