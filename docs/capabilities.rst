@@ -8,17 +8,16 @@ Platforms
 #########
 
 * Windows: 7 or newer
-* OSX: 10.6 (Snow Leopard) or newer
+* macOS: 10.6 (Snow Leopard) or newer
 * Linux: should support any distro with a working ALSA implementation
 
 Python
 ######
 
-Python 3.3 and up is officially supported and wheels (with pre-built binaries)
+Python 3.4 and up is officially supported and wheels (with pre-built binaries)
 are available for
-Windows and OSX. Python 3.2 and earlier may work as well when
-building the extension from source (as on Linux) and it has been
-confirmed to work with Python 3.2 on the Raspberry Pi.
+Windows and macOS. Python 3.2 and 3.3 may work as well when
+building the extension from source (as on Linux).
 
 Asynchronous Interface
 ----------------------

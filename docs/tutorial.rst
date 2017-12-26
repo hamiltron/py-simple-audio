@@ -17,9 +17,9 @@ The simplest way to play audio is with :func:`~simpleaudio.play_buffer`. The
 
    play_obj = sa.play_buffer(audio_data, 2, 2, 44100)
 
-The `play_obj` object is an instance of :class:`~simpleaudio.PlayObject` 
+The `play_obj` object is an instance of :class:`~simpleaudio.PlayObject`
 which could be viewed as a 'handle' to the audio playback initiated by the
-:func:`~simpleaudio.play_buffer` call. This can be used to stop playback 
+:func:`~simpleaudio.play_buffer` call. This can be used to stop playback
 of the audio clip::
 
    play_obj.stop()
@@ -40,15 +40,15 @@ useful when a script or program would otherwise exit before playback is done
 WaveObject's
 ------------
 
-In order to facilitate cleaner code, the :class:`~simpleaudio.WaveObject` 
-class is provided which stores a reference to the object containing the 
+In order to facilitate cleaner code, the :class:`~simpleaudio.WaveObject`
+class is provided which stores a reference to the object containing the
 audio as well as a copy of the playback parameters. These can be instantiated
 like so::
 
    wave_obj = sa.WaveObject(audio_data, 2, 2, 44100)
 
-Playback is started with :meth:`~simpleaudio.WaveObject.play` and a 
-:class:`~simpleaudio.PlayObject` is returned as 
+Playback is started with :meth:`~simpleaudio.WaveObject.play` and a
+:class:`~simpleaudio.PlayObject` is returned as
 with :func:`~simpleaudio.play_buffer`::
 
    play_obj = wave_obj.play()
@@ -68,20 +68,20 @@ Using Numpy
 -----------
 
 Numpy arrays can be used to store audio but there are a few crucial
-requirements. If they are to store stereo audio, the array must have two 
-columns since each column 
-contains one channel of audio data. They must also have a signed 16-bit 
-integer dtype and the sample amplitude values must consequently fall in the 
-range of -32768 to 32767. Here is an example of a simple way to 'normalize' 
+requirements. If they are to store stereo audio, the array must have two
+columns since each column
+contains one channel of audio data. They must also have a signed 16-bit
+integer dtype and the sample amplitude values must consequently fall in the
+range of -32768 to 32767. Here is an example of a simple way to 'normalize'
 the audio (making it cover the whole amplitude rage but not exceeding it)::
 
    audio_array *= 32767 / max(abs(audio_array))
 
-And here is an example of converting it to the proper data type (note that 
+And here is an example of converting it to the proper data type (note that
 this should always be done *after* normalization or other amplitude changes)::
 
    audio_array = audio_array.astype(np.int16)
-   
+
 Here is a full example that plays a few sinewave notes in succession::
 
    import numpy as np
