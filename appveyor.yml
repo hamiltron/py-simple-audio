@@ -1,5 +1,5 @@
 environment:
-  pp:
+  TWINE_PASSWORD:
     secure: fWQqBe+LX0RZ6F5XOmqzrw==
 
   matrix:
@@ -25,17 +25,5 @@ test_script:
 after_test:
   - "appveyor/build.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
 
-
-for:
--
-  branches:
-    only:
-      - travis
-
-  deploy_script:
-    - "appveyor/deploy.cmd"
-
--
-  branches:
-    except:
-      - travis
+deploy_script:
+  - "appveyor/deploy.cmd"
