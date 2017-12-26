@@ -2,7 +2,7 @@ Simpleaudio Package
 ===================
 
 The simplaudio package provides cross-platform, dependency-free audio playback
-capability for Python 3 on OSX, Windows, and Linux.
+capability for Python 3 on macOS, Windows, and Linux.
 
 MIT Licensed.
 

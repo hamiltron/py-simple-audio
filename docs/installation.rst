@@ -6,7 +6,7 @@ Installation
 Make sure you have pip installed, particularly if you are using Python 3.3 or
 earler (3.4 and 3.5 usually come packaged with pip). For Linux, this is
 usually done with the distro package manager (example:
-``sudo apt-get install python3-pip``). For Windows and OSX, have a look at
+``sudo apt-get install python3-pip``). For Windows and macOS, have a look at
 the `pip documentation <http://pip.readthedocs.org>`_.
 
 .. note::
