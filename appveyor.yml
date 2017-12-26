@@ -29,7 +29,11 @@ for:
 -
   branches:
     only:
-      - master
+      - travis
 
   deploy_script:
     - "appveyor/deploy.cmd"
+-
+  branches:
+    except:
+      - travis

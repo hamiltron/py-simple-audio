@@ -1,3 +1,3 @@
 @echo off
 
-echo "foo"
+echo "%APPVEYOR_REPO_BRANCH%"
