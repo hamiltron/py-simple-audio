@@ -25,8 +25,7 @@ test_script:
 after_test:
   - "appveyor/build.cmd %PYTHON%\\python.exe setup.py bdist_wheel"
 
-# this and the deploy script tag check are ugly - wish AV would have
-#  the deploy script switches that Travis does
+
 for:
 -
   branches:
