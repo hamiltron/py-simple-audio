@@ -10,6 +10,7 @@ PyObject* sa_python_error;
 
 play_item_t play_list_head = {
     0,         /* play_id */
+	SA_CLEAR,  /* pause_flag */
     SA_CLEAR,  /* stop_flag */
     NULL,      /* prev_item */
     NULL,      /* next_item */
@@ -40,6 +41,104 @@ static PyObject* _stop(PyObject *self, PyObject *args)
             grab_mutex(list_item->mutex);
             list_item->stop_flag = SA_STOP;
             release_mutex(list_item->mutex);
+            break;
+        }
+        list_item = list_item->next_item;
+    }
+    release_mutex(play_list_head.mutex);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* _pause(PyObject *self, PyObject *args)
+{
+    play_id_t play_id;
+    play_item_t* list_item = play_list_head.next_item;
+
+    dbg1("_pause call\n");
+
+    if (!PyArg_ParseTuple(args, "K", &play_id)) {
+        return NULL;
+    }
+
+    dbg1("looking for play ID %llu\n", play_id);
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+
+            grab_mutex(list_item->mutex);
+            list_item->pause_flag = SA_PAUSE_QUEUED;
+            release_mutex(list_item->mutex);
+
+            int pause_flag = SA_PAUSE_QUEUED;
+            while (pause_flag == SA_PAUSE_QUEUED) {
+              grab_mutex(list_item->mutex);
+              pause_flag = list_item->pause_flag;
+              release_mutex(list_item->mutex);
+            }
+
+            release_mutex(play_list_head.mutex);
+            if (pause_flag == SA_PAUSE_DONE) {
+              Py_RETURN_TRUE;
+            }
+            else {
+              Py_RETURN_FALSE;
+            }
+
+            break;
+        }
+        list_item = list_item->next_item;
+    }
+    release_mutex(play_list_head.mutex);
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* _resume(PyObject *self, PyObject *args)
+{
+	play_id_t play_id;
+    play_item_t* list_item = play_list_head.next_item;
+
+    dbg1("_resume call\n");
+
+    if (!PyArg_ParseTuple(args, "K", &play_id)) {
+        return NULL;
+    }
+
+    dbg1("looking for play ID %llu\n", play_id);
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+
+            grab_mutex(list_item->mutex);
+            list_item->pause_flag = SA_REPLAY_QUEUED;
+            release_mutex(list_item->mutex);
+
+            int pause_flag = SA_REPLAY_QUEUED;
+            while (pause_flag == SA_REPLAY_QUEUED) {
+              grab_mutex(list_item->mutex);
+              pause_flag = list_item->pause_flag;
+              release_mutex(list_item->mutex);
+            }
+
+            release_mutex(play_list_head.mutex);
+            if (pause_flag == SA_CLEAR) {
+              Py_RETURN_TRUE;
+            }
+            else {
+              Py_RETURN_FALSE;
+            }
+
             break;
         }
         list_item = list_item->next_item;
@@ -169,6 +268,8 @@ static PyObject* _play_buffer(PyObject *self, PyObject *args)
 
 static PyMethodDef _simpleaudio_methods[] = {
     {"_play_buffer",  _play_buffer, METH_VARARGS, "Play audio from an object supporting the buffer interface."},
+    {"_pause", _pause, METH_VARARGS, "Pauses the playback of the specified audio object."},
+    {"_resume", _resume, METH_VARARGS, "Resumes paused playback of the specified audio object."},
     {"_stop",  _stop, METH_VARARGS, "Stop playback of a specified audio object."},
     {"_stop_all",  _stop_all, METH_NOARGS, "Stop playback of all audio objects."},
     {"_is_playing",  _is_playing, METH_VARARGS, "Indicate whether the specified audio object is still playing."},
@@ -240,6 +341,7 @@ play_item_t* new_list_item(play_item_t* list_head) {
     new_item->prev_item = old_tail;
     new_item->mutex = create_mutex();
     new_item->play_id = (list_head->play_id)++;
+	new_item->pause_flag = SA_CLEAR;
     new_item->stop_flag = SA_CLEAR;
 
     dbg1("new list item at %p with ID %llu attached to %p\n", new_item, new_item->play_id, old_tail);

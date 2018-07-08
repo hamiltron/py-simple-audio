@@ -15,6 +15,10 @@ MIT License (see LICENSE.txt)
 
 #define RESAMPLE (1)
 
+#define SND_CMD_SUCCESS (0)
+#define SND_CMD_PCM_RESUME (0)
+#define SND_CMD_PCM_PAUSE (1)
+
 void* playback_thread(void* thread_param) {
     audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
     void* audio_ptr;
@@ -22,12 +26,14 @@ void* playback_thread(void* thread_param) {
     int samples_left = (audio_blob->len_bytes - audio_blob->used_bytes) / audio_blob->frame_size;
     int buffer_samples = audio_blob->buffer_size / audio_blob->frame_size;
     int result;
+    int pause_flag = 0;
     int stop_flag = 0;
 
     dbg1("playback thread started with audio blob at %p\n", thread_param);
 
     while (samples_left > 0 && !stop_flag) {
         grab_mutex(audio_blob->play_list_item->mutex);
+        pause_flag = audio_blob->play_list_item->pause_flag;
         stop_flag = audio_blob->play_list_item->stop_flag;
         release_mutex(audio_blob->play_list_item->mutex);
 
@@ -55,6 +61,56 @@ void* playback_thread(void* thread_param) {
         }
 
         samples_left = (audio_blob->len_bytes - audio_blob->used_bytes) / audio_blob->frame_size;
+
+        if (pause_flag == SA_PAUSE_QUEUED) {
+            result = snd_pcm_pause(audio_blob->handle, SND_CMD_PCM_PAUSE)
+
+            if (result == SND_CMD_SUCCESS) {
+                pause_flag = SA_PAUSE_DONE;
+
+                grab_mutex(audio_blob->play_list_item->mutex);
+                audio_blob->play_list_item->pause_flag = SA_PAUSE_DONE;
+                release_mutex(audio_blob->play_list_item->mutex);
+
+                // Go on with the while loop here.
+                while (!stop_flag && (pause_flag == SA_PAUSE_DONE || pause_flag == SA_REPLAY_FAILED)) {
+                    grab_mutex(audio_blob->play_list_item->mutex);
+                    pause_flag = audio_blob->play_list_item->pause_flag;
+                    stop_flag = audio_blob->play_list_item->stop_flag;
+                    release_mutex(audio_blob->play_list_item->mutex);
+
+                    if (pause_flag == SA_REPLAY_QUEUED || pause_flag == SA_CLEAR) {
+                        result = snd_pcm_pause(audio_blob->handle, SND_CMD_PCM_RESUME);
+                        if (result == SND_CMD_SUCCESS) {
+                            pause_flag = SA_CLEAR;
+
+                            grab_mutex(audio_blob->play_list_item->mutex);
+                            audio_blob->play_list_item->pause_flag = SA_CLEAR;
+                            release_mutex(audio_blob->play_list_item->mutex);
+                        }
+                        else {
+                            pause_flag = SA_REPLAY_FAILED;
+
+                            grab_mutex(audio_blob->play_list_item->mutex);
+                            audio_blob->play_list_item->pause_flag = SA_REPLAY_FAILED;
+                            release_mutex(audio_blob->play_list_item->mutex);
+                        }
+                    }
+                    else if (pause_flag == SA_PAUSE_QUEUED) {
+                        pause_flag = SA_PAUSE_DONE;
+
+                        grab_mutex(audio_blob->play_list_item->mutex);
+                        audio_blob->play_list_item->pause_flag = SA_PAUSE_DONE;
+                        release_mutex(audio_blob->play_list_item->mutex);
+                    }
+                }
+            }
+            else {
+                grab_mutex(audio_blob->play_list_item->mutex);
+                audio_blob->play_list_item->pause_flag = SA_PAUSE_FAILED;
+                release_mutex(audio_blob->play_list_item->mutex);
+            }
+        }
     }
 
     dbg2("done buffering audio - cleaning up\n");

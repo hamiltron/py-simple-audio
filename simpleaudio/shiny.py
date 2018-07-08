@@ -41,6 +41,12 @@ class PlayObject(object):
     def __init__(self, play_id):
         self.play_id = play_id
 
+    def pause(self):
+        return _sa._pause(self.play_id)
+
+    def resume(self):
+        return _sa._resume(self.play_id)
+
     def stop(self):
         _sa._stop(self.play_id)
 

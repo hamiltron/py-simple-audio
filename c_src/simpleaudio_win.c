@@ -14,101 +14,150 @@ MIT License (see LICENSE.txt)
 #define NUM_BUFS (2)
 
 #define WIN_EXCEPTION(my_msg, code, err_msg, str_ptr) \
-    snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d -- MSG: %s", my_msg, code, err_msg); \
-    PyErr_SetString(sa_python_error, str_ptr);
+snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d -- MSG: %s", my_msg, code, err_msg); \
+PyErr_SetString(sa_python_error, str_ptr);
 
 enum {
-    FILL_BUFFER_WRITE = 0,
-    FILL_BUFFER_DRAINING = 1,
-    FILL_BUFFER_DONE = 2
+  FILL_BUFFER_WRITE = 0,
+  FILL_BUFFER_DRAINING = 1,
+  FILL_BUFFER_DONE = 2
 };
 
 
 MMRESULT fill_buffer(WAVEHDR* wave_header, audio_blob_t* audio_blob) {
-    int want = wave_header->dwBufferLength;
-    int have = audio_blob->len_bytes - audio_blob->used_bytes;
-    int stop_flag = 0;
-    MMRESULT result;
+  int want = wave_header->dwBufferLength;
+  int have = audio_blob->len_bytes - audio_blob->used_bytes;
 
-    dbg2("fill_buffer call with audio blob at %p\n", audio_blob);
+  int pause_flag = 0;
+  int stop_flag = 0;
+  MMRESULT result;
 
-    grab_mutex(audio_blob->play_list_item->mutex);
-    stop_flag = audio_blob->play_list_item->stop_flag;
-    release_mutex(audio_blob->play_list_item->mutex);
+  dbg2("fill_buffer call with audio blob at %p\n", audio_blob);
 
-    dbg2("stop flag: %d\n", stop_flag);
+  grab_mutex(audio_blob->play_list_item->mutex);
+  pause_flag = audio_blob->play_list_item->pause_flag;
+  stop_flag = audio_blob->play_list_item->stop_flag;
+  release_mutex(audio_blob->play_list_item->mutex);
 
-    /* if there's still audio yet to buffer ... */
-    if (have > 0 && !stop_flag) {
-        dbg2("still filling buffers\n");
+  dbg2("stop flag: %d\n", stop_flag);
 
-        if (have > want) {have = want;}
-        result = waveOutUnprepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
-        if (result != MMSYSERR_NOERROR) {return result;}
-        memcpy(wave_header->lpData, &((char*)audio_blob->buffer_obj.buf)[audio_blob->used_bytes], have);
-        result = waveOutPrepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
-        if (result != MMSYSERR_NOERROR) {return result;}
-        result = waveOutWrite(audio_blob->handle, wave_header, sizeof(WAVEHDR));
-        if (result != MMSYSERR_NOERROR) {return result;}
-        wave_header->dwBufferLength = have;
-        audio_blob->used_bytes += have;
-    /* ... no more audio left to buffer */
-    } else {
-        if (audio_blob->num_buffers > 0) {
-            dbg2("done buffering - dellocating a buffer\n");
+  /* if there's still audio yet to buffer ... */
+  if (have > 0 && !stop_flag) {
+    dbg2("still filling buffers\n");
 
-            PyMem_Free(wave_header->lpData);
-            PyMem_Free(wave_header);
-            audio_blob->num_buffers--;
-        }
-        if (audio_blob->num_buffers == 0) {
-            dbg2("playback finished - cleaning up\n");
+    /* If a pause has been queued, pause the music. */
+    if (pause_flag == SA_PAUSE_QUEUED) {
+      result = waveOutPause(audio_blob->handle);
 
-            /* all done, cleanup */
-            waveOutClose(audio_blob->handle);
-            destroy_audio_blob(audio_blob);
-            /* admitted, this is terrible */
-            return MMSYSERR_NOERROR - 1;
-        }
+      grab_mutex(audio_blob->play_list_item->mutex);
+      if (result == MMSYSERR_NOERROR) {
+        audio_blob->play_list_item->pause_flag = SA_PAUSE_DONE;
+        pause_flag = SA_PAUSE_DONE;
+      }
+      else {
+        audio_blob->play_list_item->pause_flag = SA_PAUSE_FAILED;
+        pause_flag = SA_PAUSE_FAILED;
+      }
+
+      release_mutex(audio_blob->play_list_item->mutex);
     }
 
-    return MMSYSERR_NOERROR;
+    if (have > want) {have = want;}
+    result = waveOutUnprepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
+    if (result != MMSYSERR_NOERROR) {return result;}
+    memcpy(wave_header->lpData, &((char*)audio_blob->buffer_obj.buf)[audio_blob->used_bytes], have);
+    result = waveOutPrepareHeader(audio_blob->handle, wave_header, sizeof(WAVEHDR));
+    if (result != MMSYSERR_NOERROR) {return result;}
+    result = waveOutWrite(audio_blob->handle, wave_header, sizeof(WAVEHDR));
+    if (result != MMSYSERR_NOERROR) {return result;}
+    wave_header->dwBufferLength = have;
+    audio_blob->used_bytes += have;
+
+    while (!stop_flag && (pause_flag == SA_PAUSE_DONE || pause_flag == SA_REPLAY_FAILED)) {
+      dbg2("PAUSED\n");
+      grab_mutex(audio_blob->play_list_item->mutex);
+      pause_flag = audio_blob->play_list_item->pause_flag;
+      stop_flag = audio_blob->play_list_item->stop_flag;
+
+      if (pause_flag == SA_REPLAY_QUEUED || pause_flag == SA_CLEAR) {
+        result = waveOutRestart(audio_blob->handle);
+        if (result == MMSYSERR_NOERROR) {
+          pause_flag = SA_CLEAR;
+          audio_blob->play_list_item->pause_flag = SA_CLEAR;
+        }
+        else {
+          pause_flag = SA_REPLAY_FAILED;
+          audio_blob->play_list_item->pause_flag = SA_REPLAY_FAILED;
+        }
+      }
+      else if (pause_flag == SA_PAUSE_QUEUED) {
+        pause_flag = SA_PAUSE_DONE;
+
+        grab_mutex(audio_blob->play_list_item->mutex);
+        audio_blob->play_list_item->pause_flag = SA_PAUSE_DONE;
+        release_mutex(audio_blob->play_list_item->mutex);
+      }
+
+      release_mutex(audio_blob->play_list_item->mutex);
+    }
+    /* ... no more audio left to buffer */
+  } else {
+    if (audio_blob->num_buffers > 0) {
+      dbg2("done buffering - dellocating a buffer\n");
+
+      PyMem_Free(wave_header->lpData);
+      PyMem_Free(wave_header);
+      audio_blob->num_buffers--;
+    }
+    if (audio_blob->num_buffers == 0) {
+      dbg2("playback finished - cleaning up\n");
+
+      /* all done, cleanup */
+      waveOutClose(audio_blob->handle);
+      destroy_audio_blob(audio_blob);
+      /* admitted, this is terrible */
+      return MMSYSERR_NOERROR - 1;
+    }
+  }
+
+  return MMSYSERR_NOERROR;
 }
 
 DWORD WINAPI bufferThread(LPVOID thread_param) {
-    audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
-    MSG message;
-    WAVEHDR* wave_header;
-    MMRESULT result;
+  audio_blob_t* audio_blob = (audio_blob_t*)thread_param;
+  MSG message;
+  WAVEHDR* wave_header;
+  MMRESULT result;
 
-    dbg1("buffer thread started with audio blob at %p\n", thread_param);
+  dbg1("buffer thread started with audio blob at %p\n", thread_param);
 
-    /* wait for the "audio block done" message" */
-    while (1) {
-        GetMessage(&message, NULL, 0, 0);
-        if (message.message == MM_WOM_DONE) {
-            wave_header = (WAVEHDR*)message.lParam;
-            result = fill_buffer(wave_header, audio_blob);
-            if (result != MMSYSERR_NOERROR) {
-                dbg1("result code %d - quitting buffer loop\n", result);
+  /* wait for the "audio block done" message" */
+  while (1) {
+    GetMessage(&message, NULL, 0, 0);
+    if (message.message == MM_WOM_DONE) {
+      wave_header = (WAVEHDR*)message.lParam;
+      dbg1("1 calling fill_buffer\n");
+      result = fill_buffer(wave_header, audio_blob);
+      if (result != MMSYSERR_NOERROR) {
+        dbg1("result code %d - quitting buffer loop\n", result);
 
-                break;
-            }
-        }
-        if (message.message == WM_QUIT) {
-            dbg1("got WM_QUIT message\n");
-
-            break;
-        }
+        break;
+      }
     }
+    if (message.message == WM_QUIT) {
+      dbg1("got WM_QUIT message\n");
 
-    dbg1("buffer thread done\n");
+      break;
+    }
+  }
 
-    return 0;
+  dbg1("buffer thread done\n");
+
+  return 0;
 }
 
 PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int bytes_per_chan,
-                  int sample_rate, play_item_t* play_list_head, int latency_us) {
+  int sample_rate, play_item_t* play_list_head, int latency_us) {
     char err_msg_buf[SA_ERR_STR_LEN];
     char sys_msg_buf[SA_ERR_STR_LEN / 2];
     audio_blob_t* audio_blob;
@@ -148,53 +197,53 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_format.cbSize = 0;
 
     /* create the cleanup thread so we can return after calling waveOutWrite
-       SEE :http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx
+    SEE :http://msdn.microsoft.com/en-us/library/windows/desktop/ms682516(v=vs.85).aspx
     */
     thread_handle = CreateThread(NULL, 0, bufferThread, audio_blob, 0, &thread_id);
     if (thread_handle != NULL) {
-        /* Close so we don't leak handles - similar to detatched POSIX threads */
-        CloseHandle(thread_handle);
+      /* Close so we don't leak handles - similar to detatched POSIX threads */
+      CloseHandle(thread_handle);
     } else {
-        DWORD lastError = GetLastError();
-        /* lang code : US En */
-        FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL, lastError, 0x0409, sys_msg_buf, SYS_STR_LEN, NULL);
-        WIN_EXCEPTION("Failed to start cleanup thread.", 0, sys_msg_buf, err_msg_buf);
+      DWORD lastError = GetLastError();
+      /* lang code : US En */
+      FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL, lastError, 0x0409, sys_msg_buf, SYS_STR_LEN, NULL);
+      WIN_EXCEPTION("Failed to start cleanup thread.", 0, sys_msg_buf, err_msg_buf);
 
-        destroy_audio_blob(audio_blob);
-        return NULL;
+      destroy_audio_blob(audio_blob);
+      return NULL;
     }
 
     /* open a handle to the default audio device */
     result = waveOutOpen((HWAVEOUT*)&audio_blob->handle, WAVE_MAPPER, &audio_format, thread_id, 0, CALLBACK_THREAD);
     if (result != MMSYSERR_NOERROR) {
-        waveOutGetErrorText(result, sys_msg_buf, SYS_STR_LEN);
-        WIN_EXCEPTION("Failed to open audio device.", result, sys_msg_buf, err_msg_buf);
+      waveOutGetErrorText(result, sys_msg_buf, SYS_STR_LEN);
+      WIN_EXCEPTION("Failed to open audio device.", result, sys_msg_buf, err_msg_buf);
 
-        PostThreadMessage(thread_id, WM_QUIT, 0, 0);
-        destroy_audio_blob(audio_blob);
-        return NULL;
+      PostThreadMessage(thread_id, WM_QUIT, 0, 0);
+      destroy_audio_blob(audio_blob);
+      return NULL;
     }
 
     dbg1("allocating %d buffers of %d bytes\n", NUM_BUFS, buffer_size);
 
     for (i = 0; i < NUM_BUFS; i++) {
-        temp_wave_hdr = PyMem_Malloc(sizeof(WAVEHDR));
-        memset(temp_wave_hdr, 0, sizeof(WAVEHDR));
-        temp_wave_hdr->lpData = PyMem_Malloc(buffer_size);
-        temp_wave_hdr->dwBufferLength = buffer_size;
+      temp_wave_hdr = PyMem_Malloc(sizeof(WAVEHDR));
+      memset(temp_wave_hdr, 0, sizeof(WAVEHDR));
+      temp_wave_hdr->lpData = PyMem_Malloc(buffer_size);
+      temp_wave_hdr->dwBufferLength = buffer_size;
 
-        result = fill_buffer(temp_wave_hdr, audio_blob);
-        if (result != MMSYSERR_NOERROR) {
-            waveOutGetErrorText(result, sys_msg_buf, SYS_STR_LEN);
-            WIN_EXCEPTION("Failed to buffer audio.", result, sys_msg_buf, err_msg_buf);
+      result = fill_buffer(temp_wave_hdr, audio_blob);
+      if (result != MMSYSERR_NOERROR) {
+        waveOutGetErrorText(result, sys_msg_buf, SYS_STR_LEN);
+        WIN_EXCEPTION("Failed to buffer audio.", result, sys_msg_buf, err_msg_buf);
 
-            PostThreadMessage(thread_id, WM_QUIT, 0, 0);
-            waveOutUnprepareHeader(audio_blob->handle, temp_wave_hdr, sizeof(WAVEHDR));
-            waveOutClose(audio_blob->handle);
-            destroy_audio_blob(audio_blob);
-            return NULL;
-        }
+        PostThreadMessage(thread_id, WM_QUIT, 0, 0);
+        waveOutUnprepareHeader(audio_blob->handle, temp_wave_hdr, sizeof(WAVEHDR));
+        waveOutClose(audio_blob->handle);
+        destroy_audio_blob(audio_blob);
+        return NULL;
+      }
     }
 
     return PyLong_FromUnsignedLongLong(audio_blob->play_list_item->play_id);
-}
+  }

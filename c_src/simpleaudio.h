@@ -14,11 +14,17 @@ MIT License (see LICENSE.txt)
 
 #define SA_CLEAR (0)
 #define SA_STOP (1)
+#define SA_PAUSE_QUEUED (2)
+#define SA_REPLAY_QUEUED (3)
+#define SA_PAUSE_DONE (4)
+#define SA_PAUSE_FAILED (5)
+#define SA_REPLAY_FAILED (6)
 
 #define SA_LATENCY_US (100000)
 
 #define DBG_OUT stdout
 #define DBG_PRE "[dbg] "
+#define DEBUG 0
 
 /* debug print function prototypes */
 void dbg1(const char* str, ...);
@@ -51,6 +57,7 @@ typedef struct play_item_s {
     /* the play_id of the list head is used to store the next play_id value
        used by a new play list item */
     play_id_t play_id;
+	int pause_flag;
     int stop_flag;
     struct play_item_s* prev_item;
     struct play_item_s* next_item;
