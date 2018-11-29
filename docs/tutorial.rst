@@ -82,7 +82,7 @@ this should always be done *after* normalization or other amplitude changes)::
 
    audio_array = audio_array.astype(np.int16)
 
-Here is a full example that plays a few sinewave notes in succession::
+Here is a full example that plays a few sinewave notes in succession with stereo::
 
    import numpy as np
    import simpleaudio as sa
@@ -109,8 +109,12 @@ Here is a full example that plays a few sinewave notes in succession::
    # convert to 16-bit data
    audio = audio.astype(np.int16)
 
+   stereo_audio = np.zeros([int(sample_rate*T*3),2],dtype=np.int16)   
+   stereo_audio[:,1] = audio[:] # 0 for left and 1 for right
    # start playback
-   play_obj = sa.play_buffer(audio, 1, 2, sample_rate)
+   play_obj = sa.play_buffer(stereo_audio, 2, 2, sample_rate)
 
    # wait for playback to finish before exiting
    play_obj.wait_done()
+   
+   
