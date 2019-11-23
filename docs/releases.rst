@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+* 1.0.3
+
+   * Added CI builds of pre-built binaries for Python 3.7 and 3.8, dropped others
+
 * 1.0.2
 
    * Fixed Linux and Windows thread resource leaks

@@ -14,9 +14,9 @@ Platforms
 Python
 ######
 
-Python 3.4 and up is officially supported and wheels (with pre-built binaries)
+Python 3.7 and up is officially supported and wheels (with pre-built binaries)
 are available for
-Windows and macOS. Python 3.2 and 3.3 may work as well when
+Windows and macOS. Earlier versions of Python may work as well when
 building the extension from source (as on Linux).
 
 Asynchronous Interface

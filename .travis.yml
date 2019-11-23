@@ -6,7 +6,7 @@ matrix:
         packages:
         - libasound2-dev
     language: python
-    python: '3.6'
+    python: '3.8'
     before_install:
     - ./travis/package_deps.sh
     install: ./travis/linux_build.sh
@@ -15,31 +15,26 @@ matrix:
     - ./travis/format_checks.sh
   - os: osx
     language: objective-c
-    env: PY_VER=3.4.4
+    env:
+      - PY_VER=3.7.5
+      - PY_PKG=python-3.7.5-macosx10.6.pkg
     before_install:
-    - ./travis/osx_install_py3.sh
-    - ./travis/package_deps.sh
+      - ./travis/osx_install_py3.sh
+      - ./travis/package_deps.sh
     install: ./travis/osx_build.sh
     script:
-    - python3 setup.py test
+      - python3 setup.py test
   - os: osx
     language: objective-c
-    env: PY_VER=3.5.4
+    env:
+      - PY_VER=3.8.0
+      - PY_PKG=python-3.8.0-macosx10.9.pkg
     before_install:
-    - ./travis/osx_install_py3.sh
-    - ./travis/package_deps.sh
+      - ./travis/osx_install_py3.sh
+      - ./travis/package_deps.sh
     install: ./travis/osx_build.sh
     script:
-    - python3 setup.py test
-  - os: osx
-    language: objective-c
-    env: PY_VER=3.6.3
-    before_install:
-    - ./travis/osx_install_py3.sh
-    - ./travis/package_deps.sh
-    install: ./travis/osx_build.sh
-    script:
-    - python3 setup.py test
+      - python3 setup.py test
 
 deploy:
 - provider: script
