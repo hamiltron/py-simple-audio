@@ -103,6 +103,10 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
         sample_format = SND_PCM_FORMAT_U8;
     } else if (bytes_per_chan == 2) {
         sample_format = SND_PCM_FORMAT_S16_LE;
+    } else if (bytes_per_chan == 3) {
+        sample_format = SND_PCM_FORMAT_S24_3LE;
+    } else if (bytes_per_chan == 4) {
+        sample_format = SND_PCM_FORMAT_FLOAT_LE;
     } else {
         ALSA_EXCEPTION("Unsupported Sample Format.", 0, "", err_msg_buf);
         return NULL;

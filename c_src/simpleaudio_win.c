@@ -6,7 +6,7 @@ MIT License (see LICENSE.txt)
 
 #include "simpleaudio.h"
 #include <Windows.h>
-#include <Mmsystem.h>
+#include <mmreg.h>
 #include <stdlib.h>
 
 #define SYS_STR_LEN (SA_ERR_STR_LEN / 2)
@@ -137,7 +137,11 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     release_mutex(play_list_head->mutex);
 
     /* windows audio device and format headers setup */
-    audio_format.wFormatTag = WAVE_FORMAT_PCM;
+    if (bytes_per_chan < 4) {
+        audio_format.wFormatTag = WAVE_FORMAT_PCM;
+    } else {
+        audio_format.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    }
     audio_format.nChannels = num_channels;
 
     audio_format.nSamplesPerSec = sample_rate;

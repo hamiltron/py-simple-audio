@@ -94,9 +94,11 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_fmt.mSampleRate = sample_rate;
     audio_fmt.mFormatID = kAudioFormatLinearPCM;
     audio_fmt.mFormatFlags = kAudioFormatFlagIsPacked;
-    if (bytes_per_chan >= 2) {
+    if (bytes_per_chan == 2 || bytes_per_chan == 3) {
       /* don't set the signed flag for 8-bit audio */
       audio_fmt.mFormatFlags |= kAudioFormatFlagIsSignedInteger;
+    } else if (bytes_per_chan == 4) {
+      audio_fmt.mFormatFlags |= kAudioFormatFlagIsFloat;
     }
     audio_fmt.mFramesPerPacket = 1;
     audio_fmt.mChannelsPerFrame = num_channels;

@@ -127,8 +127,8 @@ static PyObject* _play_buffer(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if (bytes_per_channel < 1 || bytes_per_channel > 2) {
-        PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1 (8-bit) or 2 (16-bit).");
+    if (bytes_per_channel < 1 || bytes_per_channel > 5) {
+        PyErr_SetString(PyExc_ValueError, "Bytes-per-sample must be 1, 2, 3, or 4.");
         return NULL;
     }
 
