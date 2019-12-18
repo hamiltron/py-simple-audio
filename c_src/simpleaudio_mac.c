@@ -26,13 +26,13 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 
     if (audio_blob->play_list_item->ratio_flag > DEFAULT_RATIO_FLAG){
         dbg2("found ratio flag %f\n", audio_blob->play_list_item->ratio_flag);
-    	// Change the ratio (0.0 to 1.0) to the value provided if it was not 0.0
-	// Current implementation takes a small moment to be effective because buffer size is big
-	dbg2("audio_blob->play_list_item->ratio_flag=%f\n", audio_blob->play_list_item->ratio_flag);
-	dbg2("audio_blob->len_bytes=%d\n", audio_blob->len_bytes);
-	dbg2("audio_blob->used_bytes=%d before \n", audio_blob->used_bytes);
-	/* Casting to int may not be ideal */
-	audio_blob->used_bytes = queue_buffer->mAudioDataByteSize * (int) (audio_blob->play_list_item->ratio_flag * (float) (audio_blob->len_bytes) / queue_buffer->mAudioDataByteSize);
+        // Change the ratio (0.0 to 1.0) to the value provided if it was not 0.0
+        // Current implementation takes a small moment to be effective because buffer size is big
+        dbg2("audio_blob->play_list_item->ratio_flag=%f\n", audio_blob->play_list_item->ratio_flag);
+        dbg2("audio_blob->len_bytes=%d\n", audio_blob->len_bytes);
+        dbg2("audio_blob->used_bytes=%d before \n", audio_blob->used_bytes);
+        /* Casting to int may not be ideal */
+        audio_blob->used_bytes = queue_buffer->mAudioDataByteSize * (int) (audio_blob->play_list_item->ratio_flag * (float) (audio_blob->len_bytes) / queue_buffer->mAudioDataByteSize);
         dbg2("audio_blob->used_bytes=%d after\n", audio_blob->used_bytes);
         // reset flag
         audio_blob->play_list_item->ratio_flag = DEFAULT_RATIO_FLAG;
