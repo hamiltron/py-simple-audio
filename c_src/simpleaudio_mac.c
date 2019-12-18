@@ -10,7 +10,9 @@ MIT License (see LICENSE.txt)
 /* this should be replaced by whatever constant Apple has designated */
 #define SUCCESS (0)
 
-#define NUM_BUFS (2)
+#define NUM_BUFS (4)
+
+#define DEFAULT_RATIO_FLAG (-1.0)
 
 #define MAC_EXCEPTION(my_msg, code, str_ptr) \
     snprintf(str_ptr, SA_ERR_STR_LEN, "%s -- CODE: %d", my_msg, (int)code); \
@@ -21,12 +23,26 @@ MIT License (see LICENSE.txt)
    OSX API calls are not checked for errors here */
 static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuffer *queue_buffer) {
     audio_blob_t* audio_blob = (audio_blob_t*)param;
+
+    if (audio_blob->play_list_item->ratio_flag > DEFAULT_RATIO_FLAG){
+        dbg2("found ratio flag %f\n", audio_blob->play_list_item->ratio_flag);
+    	// Change the ratio (0.0 to 1.0) to the value provided if it was not 0.0
+	// Current implementation takes a small moment to be effective because buffer size is big
+	dbg2("audio_blob->play_list_item->ratio_flag=%f\n", audio_blob->play_list_item->ratio_flag);
+	dbg2("audio_blob->len_bytes=%d\n", audio_blob->len_bytes);
+	dbg2("audio_blob->used_bytes=%d before \n", audio_blob->used_bytes);
+	audio_blob->used_bytes = queue_buffer->mAudioDataByteSize * (int) (audio_blob->play_list_item->ratio_flag * (float) (audio_blob->len_bytes) / queue_buffer->mAudioDataByteSize);
+        dbg2("audio_blob->used_bytes=%d after\n", audio_blob->used_bytes);
+        // reset the flag to -1.0
+        audio_blob->play_list_item->ratio_flag = DEFAULT_RATIO_FLAG;
+    }
     int want = queue_buffer->mAudioDataBytesCapacity;
     int have = audio_blob->len_bytes-audio_blob->used_bytes;
     int stop_flag;
 
     dbg2("audio_callback call with audio blob at %p\n", param);
 
+    audio_blob->play_list_item->read_ratio = 1.0 - ((float) have/ (float) audio_blob->len_bytes);  
     grab_mutex(audio_blob->play_list_item->mutex);
     stop_flag = audio_blob->play_list_item->stop_flag;
     release_mutex(audio_blob->play_list_item->mutex);
@@ -35,8 +51,8 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 
     /* if there's still audio yet to buffer ... */
     if (have > 0 && !stop_flag) {
+	/* Update the read ratio */
         dbg2("still feeding queue\n");
-
         if (have > want) {have = want;}
         memcpy(queue_buffer->mAudioData, audio_blob->buffer_obj.buf + (size_t)(audio_blob->used_bytes), have);
         queue_buffer->mAudioDataByteSize = have;
@@ -45,6 +61,7 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
     /* ... no more audio left to buffer */
     } else {
         dbg2("done enqueue'ing - dellocating a buffer\n");
+	// printf("dgb2");
 
         if (audio_blob->num_buffers > 0) {
             AudioQueueFreeBuffer(audio_queue, queue_buffer);
@@ -83,6 +100,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytesPerFrame;
     audio_blob->num_buffers = NUM_BUFS;
+    // printf("len_bytes=%d, buffer_size=%d, num_buffers=%d\n", audio_blob->len_bytes, buffer_size, NUM_BUFS);
 
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);
@@ -124,6 +142,7 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     dbg1("allocating %d queue buffers of %d bytes\n", NUM_BUFS, buffer_size);
 
     for(i = 0; i < NUM_BUFS; i++) {
+	// printf("%d/%d\n", i, NUM_BUFS);
         result = AudioQueueAllocateBuffer(audio_queue, buffer_size, &queue_buffer);
         if (result != SUCCESS) {
             MAC_EXCEPTION("Unable to allocate buffer.", result, err_msg_buf);

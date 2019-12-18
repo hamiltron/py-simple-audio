@@ -52,6 +52,9 @@ typedef struct play_item_s {
        used by a new play list item */
     play_id_t play_id;
     int stop_flag;
+    float read_ratio; 
+    float ratio_flag;
+    /* Saves the ratio (in [0, 1]) of waveform already read */
     struct play_item_s* prev_item;
     struct play_item_s* next_item;
     /* the mutex of the list head is used as a 'global' mutex for modifying
