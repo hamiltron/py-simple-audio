@@ -31,9 +31,10 @@ static void audio_callback(void* param, AudioQueueRef audio_queue, AudioQueueBuf
 	dbg2("audio_blob->play_list_item->ratio_flag=%f\n", audio_blob->play_list_item->ratio_flag);
 	dbg2("audio_blob->len_bytes=%d\n", audio_blob->len_bytes);
 	dbg2("audio_blob->used_bytes=%d before \n", audio_blob->used_bytes);
+	/* Casting to int may not be ideal */
 	audio_blob->used_bytes = queue_buffer->mAudioDataByteSize * (int) (audio_blob->play_list_item->ratio_flag * (float) (audio_blob->len_bytes) / queue_buffer->mAudioDataByteSize);
         dbg2("audio_blob->used_bytes=%d after\n", audio_blob->used_bytes);
-        // reset the flag to -1.0
+        // reset flag
         audio_blob->play_list_item->ratio_flag = DEFAULT_RATIO_FLAG;
     }
     int want = queue_buffer->mAudioDataBytesCapacity;
@@ -100,7 +101,6 @@ PyObject* play_os(Py_buffer buffer_obj, int len_samples, int num_channels, int b
     audio_blob->list_mutex = play_list_head->mutex;
     audio_blob->len_bytes = len_samples * bytesPerFrame;
     audio_blob->num_buffers = NUM_BUFS;
-    // printf("len_bytes=%d, buffer_size=%d, num_buffers=%d\n", audio_blob->len_bytes, buffer_size, NUM_BUFS);
 
     /* setup the linked list item for this playback buffer */
     grab_mutex(play_list_head->mutex);

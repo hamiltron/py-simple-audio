@@ -42,9 +42,6 @@ static PyObject* _read_ratio(PyObject *self, PyObject *args)
     }
     
     release_mutex(play_list_head.mutex);  
-    // PyObject_Print(PyFloat_FromDouble((double)1.0), stdout, 0);
-    // return PyFloat_FromDouble(14.0); 
-    // return PyFloat_FromDouble((double) play_list_head.play_id);
     return PyFloat_FromDouble((double) list_item->read_ratio);
 }
 
@@ -57,6 +54,7 @@ static PyObject* _set_ratio(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "Kf", &play_id, &ratio)) {
         return NULL;
     }
+    /* Fixes the ratio rather than returning if not in [0.0, 1.0] */
     if (ratio < 0.0){ratio = 0.0;}
     if (ratio > 1.0){ratio = 1.0;}
     dbg1("looking for play ID %llu\n", play_id);
@@ -76,7 +74,6 @@ static PyObject* _set_ratio(PyObject *self, PyObject *args)
     release_mutex(play_list_head.mutex);
     // Set the ratio value in flag
     list_item->ratio_flag = ratio;
-
     return PyFloat_FromDouble((double) list_item->read_ratio);
 }
 
