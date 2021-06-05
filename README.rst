@@ -6,6 +6,10 @@ capability for Python 3 on OSX, Windows, and Linux.
 
 MIT Licensed.
 
+-- ANNOUNCEMENT!! -- 
+--------------------
+**I've started a crowdfunding campaign** on `Indiegogo <https://igg.me/at/simpleaudio>`_ in effort to help keep this project alive. **Check it out and help spread the word!** 
+
 `Documentation at RTFD <http://simpleaudio.readthedocs.io/>`_
 --------------------------------------------------------------
 
