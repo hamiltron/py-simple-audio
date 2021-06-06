@@ -3,6 +3,7 @@
 # MIT License (see LICENSE.txt)
 
 import simpleaudio._simpleaudio as _sa
+from threading import Thread
 from time import sleep
 import wave
 
@@ -15,9 +16,9 @@ class WaveObject(object):
         self.bytes_per_sample = bytes_per_sample
         self.sample_rate = sample_rate
 
-    def play(self):
+    def play(self, on_stop=None):
         return play_buffer(self.audio_data, self.num_channels,
-                           self.bytes_per_sample, self.sample_rate)
+                           self.bytes_per_sample, self.sample_rate, on_stop)
 
     @classmethod
     def from_wave_file(cls, wave_file):
@@ -37,9 +38,17 @@ class WaveObject(object):
             self.num_channels, self.bytes_per_sample * 8, self.sample_rate)
 
 
-class PlayObject(object):
-    def __init__(self, play_id):
+class PlayObject(Thread):
+    def __init__(self, play_id, on_stop=None):
         self.play_id = play_id
+        self.on_stop = on_stop
+        if self.on_stop:
+            super(PlayObject, self).__init__()
+            self.start()
+
+    def run(self):
+        self.wait_done()
+        self.on_stop()
 
     def stop(self):
         _sa._stop(self.play_id)
@@ -56,7 +65,7 @@ def stop_all():
     _sa._stop_all()
 
 
-def play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate):
+def play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate, on_stop=None):
     play_id = _sa._play_buffer(audio_data, num_channels, bytes_per_sample,
                                sample_rate)
-    return PlayObject(play_id)
+    return PlayObject(play_id, on_stop=on_stop)

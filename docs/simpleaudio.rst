@@ -17,10 +17,11 @@ API
    :param int bytes_per_sample: the number of bytes per single-channel sample
    :param int sample_rate: the sample rate in Hz
 
-.. method:: WaveObject.play()
+.. method:: WaveObject.play([on_stop])
 
    Starts playback of the audio
 
+   :param callable on_stop: A :class:callable that will be executed after after the playback job stopped.
    :rtype: :rtype: a :class:`PlayObject` instance for the playback job
 
 .. classmethod:: WaveObject.from_wave_file(wave_file)
@@ -36,12 +37,14 @@ API
 
    :param wave_read: a :class:`Wave_read` object
 
-.. class:: PlayObject
+.. class:: PlayObject([on_stop])
 
    Instances of :class:`PlayObject` are returned by :meth:`WaveObject.play()` and
    :func:`play_buffer()` and are essentially handles to the
    audio playback jobs initiated and allow basic actions to be taken on the job
    (such as stopping playback).
+
+   :param callable on_stop: A :class:callable that will be executed after after the playback job stopped.
 
 .. method:: PlayObject.stop()
 
@@ -62,7 +65,7 @@ API
 
    Stop all currently playing audio.
 
-.. function:: play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate)
+.. function:: play_buffer(audio_data, num_channels, bytes_per_sample, sample_rate, on_stop)
 
    Start playback of audio data from an object supporting the buffer
    interface and with the given playback parameters.
@@ -71,6 +74,7 @@ API
    :param int num_channels: the number of audio channels
    :param int bytes_per_sample: the number of bytes per single-channel sample
    :param int sample_rate: the sample rate in Hz
+   :param callable on_stop A :class:callable that will be executed after after the playback job stopped.
    :rtype: a :class:`PlayObject` instance for the playback job
 
 Examples
