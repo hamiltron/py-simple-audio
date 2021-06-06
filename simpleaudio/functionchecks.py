@@ -42,7 +42,7 @@ class FunctionCheckBase(object):
             print("Starting check in ...")
             for tick in reversed(range(1, countdown + 1)):
                 print(tick, "...")
-                sleep(1)
+                sleep(0.1)
         print("RUNNING CHECK ...")
         cls._check()
         print("... DONE")
@@ -59,7 +59,7 @@ class LeftRightCheck(FunctionCheckBase):
     def _check(cls):
         wave_obj = _gwo("left_right.wav")
         wave_obj.play()
-        sleep(4)
+        sleep(2)
 
 
 class OverlappingCheck(FunctionCheckBase):
