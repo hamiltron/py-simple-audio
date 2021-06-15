@@ -24,7 +24,7 @@ of the audio clip::
 
    play_obj.stop()
 
-It can used to check whether a sound clip is still playing::
+It can be used to check whether a sound clip is still playing::
 
    if play_obj.is_playing():
       print("still playing")
