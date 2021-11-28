@@ -1,3 +1,11 @@
+NOTE: THIS PROJECT IS ARCHIVED
+==============================
+
+I no longer have the time to dedicate to maintaining Simpleaudio (which at this point is mostly keeping CI builds working). 
+This project should be considered archived, meaning that there will be no further updates or builds. 
+For anyone seriously interested in taking over the project, I would be willing to help in that process. 
+I would also be willing to revisit maintaining the library should anyone wish to sponsor it. 
+
 Simpleaudio Package
 ===================
 
@@ -5,10 +13,6 @@ The simplaudio package provides cross-platform, dependency-free audio playback
 capability for Python 3 on OSX, Windows, and Linux.
 
 MIT Licensed.
-
--- ANNOUNCEMENT!! -- 
---------------------
-**I've started a crowdfunding campaign** on `Indiegogo <https://igg.me/at/simpleaudio>`_ in effort to help keep this project alive. **Check it out and help spread the word!** 
 
 `Documentation at RTFD <http://simpleaudio.readthedocs.io/>`_
 --------------------------------------------------------------
