@@ -4,6 +4,7 @@
 
 import simpleaudio._simpleaudio as _sa
 from time import sleep
+from asyncio import sleep as async_sleep
 import wave
 
 
@@ -47,6 +48,10 @@ class PlayObject(object):
     def wait_done(self):
         while self.is_playing():
             sleep(0.05)
+
+    async def async_wait_done(self):
+        while self.is_playing():
+            async async_sleep(0.05)
 
     def is_playing(self):
         return _sa._is_playing(self.play_id)
