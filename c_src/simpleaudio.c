@@ -11,16 +11,78 @@ PyObject* sa_python_error;
 play_item_t play_list_head = {
     0,         /* play_id */
     SA_CLEAR,  /* stop_flag */
+    0.0,       /* Read ratio (0.0 to 1.0) */
+    -1.0,      /* Radio_flag (momentarily set to 0. and 1. when changed) */
     NULL,      /* prev_item */
     NULL,      /* next_item */
     NULL       /* mutex */
 };
 
-static PyObject* _stop(PyObject *self, PyObject *args)
+static PyObject* _read_ratio(PyObject *self, PyObject *args)
 {
     play_id_t play_id;
     play_item_t* list_item = play_list_head.next_item;
 
+    if (!PyArg_ParseTuple(args, "K", &play_id)) {
+        return NULL;
+    }
+
+    dbg1("looking for play ID %llu\n", play_id);
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+            break;
+        }
+        list_item = list_item->next_item;
+    }
+    
+    release_mutex(play_list_head.mutex);  
+    return PyFloat_FromDouble((double) list_item->read_ratio);
+}
+
+static PyObject* _set_ratio(PyObject *self, PyObject *args)
+{
+    play_id_t play_id;
+    float ratio;
+    play_item_t* list_item = play_list_head.next_item;
+
+    if (!PyArg_ParseTuple(args, "Kf", &play_id, &ratio)) {
+        return NULL;
+    }
+    /* Fixes the ratio rather than returning if not in [0.0, 1.0] */
+    if (ratio < 0.0){ratio = 0.0;}
+    if (ratio > 1.0){ratio = 1.0;}
+    dbg1("looking for play ID %llu\n", play_id);
+
+    /* walk the list and find the matching play ID */
+    grab_mutex(play_list_head.mutex);
+    while(list_item != NULL) {
+        if (list_item->play_id == play_id) {
+            #if DEBUG > 0
+            fprintf(DBG_OUT, DBG_PRE"found play ID in list item at %p\n", list_item);
+            #endif
+            break;
+        }
+        list_item = list_item->next_item;
+    }
+
+    release_mutex(play_list_head.mutex);
+    // Set the ratio value in flag
+    list_item->ratio_flag = ratio;
+    return PyFloat_FromDouble((double) list_item->read_ratio);
+}
+
+
+/* Py_RETURN_NONE; */
+static PyObject* _stop(PyObject *self, PyObject *args)
+{
+    play_id_t play_id;
+    play_item_t* list_item = play_list_head.next_item;
     dbg1("_stop call\n");
 
     if (!PyArg_ParseTuple(args, "K", &play_id)) {
@@ -172,6 +234,8 @@ static PyMethodDef _simpleaudio_methods[] = {
     {"_stop",  _stop, METH_VARARGS, "Stop playback of a specified audio object."},
     {"_stop_all",  _stop_all, METH_NOARGS, "Stop playback of all audio objects."},
     {"_is_playing",  _is_playing, METH_VARARGS, "Indicate whether the specified audio object is still playing."},
+    {"_read_ratio", _read_ratio, METH_VARARGS, "Returns the ratio of bytes already read, as a float"},
+    {"_set_ratio", _set_ratio, METH_VARARGS, "Being given a play_id and a float in [0.0,1.0], sets the playing back to this ratio of the wave"},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
@@ -241,6 +305,7 @@ play_item_t* new_list_item(play_item_t* list_head) {
     new_item->mutex = create_mutex();
     new_item->play_id = (list_head->play_id)++;
     new_item->stop_flag = SA_CLEAR;
+    new_item->ratio_flag = list_head->ratio_flag;
 
     dbg1("new list item at %p with ID %llu attached to %p\n", new_item, new_item->play_id, old_tail);
 

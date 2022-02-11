@@ -50,6 +50,15 @@ class PlayObject(object):
 
     def is_playing(self):
         return _sa._is_playing(self.play_id)
+    
+    def read_ratio(self):
+        return _sa._read_ratio(self.play_id)
+   
+    def set_ratio(self, ratio):
+        if ratio < 0 or ratio > 1:
+             print('Ratio={} should be between 0 and 1'.format(ratio))
+             return
+        return _sa._set_ratio(self.play_id, ratio)
 
 
 def stop_all():

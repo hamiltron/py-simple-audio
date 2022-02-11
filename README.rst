@@ -49,6 +49,22 @@ Simple Example
    play_obj = wave_obj.play()
    play_obj.wait_done()
 
+
+Using `read_ and set_ratio`:
+
+.. code-block:: python
+
+   import simpleaudio as sa
+
+   wave_obj = sa.WaveObject.from_wave_file("path/to/file.wav")
+   play_obj = wave_obj.play()
+   time.sleep(1)
+   print("This is the propertion of the file already played", play_obj.read_ratio())
+   play_obj.set_ratio(0.9)
+   time.sleep(0.5)  # need to wait a bit for this change to be effective
+   print("set_ratio moved the file playing towards the end of the file. Now at", play_obj.read_ratio())
+   
+
 Support
 -------
 
