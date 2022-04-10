@@ -95,7 +95,9 @@ Here is a full example that plays a few sinewave notes in succession::
    # get timesteps for each sample, T is note duration in seconds
    sample_rate = 44100
    T = 0.25
-   t = np.linspace(0, T, T * sample_rate, False)
+   # t = np.linspace(0, T, T * sample_rate, False)
+   t = np.linspace(0, T, int(T*sample_rate), False)
+
 
    # generate sine wave notes
    A_note = np.sin(A_freq * t * 2 * np.pi)
@@ -136,7 +138,8 @@ in one speaker than the other, 'panning' it to one side or the other. The full e
    # get timesteps for each sample, T is note duration in seconds
    sample_rate = 44100
    T = 0.5
-   t = np.linspace(0, T, T * sample_rate, False)
+   # t = np.linspace(0, T, T * sample_rate, False)
+   t = np.linspace(0, T, int(T*sample_rate), False)
 
    # generate sine wave notes
    A_note = np.sin(A_freq * t * 2 * np.pi)
@@ -183,7 +186,8 @@ the packed 24-bit audio to be played::
    # get timesteps for each sample, T is note duration in seconds
    sample_rate = 44100
    T = 0.5
-   t = np.linspace(0, T, T * sample_rate, False)
+   # t = np.linspace(0, T, T * sample_rate, False)
+   t = np.linspace(0, T, int(T*sample_rate), False)
 
    # generate sine wave tone
    tone = np.sin(440 * t * 2 * np.pi)
