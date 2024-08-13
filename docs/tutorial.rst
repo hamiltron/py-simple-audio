@@ -73,7 +73,7 @@ columns since each column
 contains one channel of audio data. They must also have a signed 16-bit
 integer dtype and the sample amplitude values must consequently fall in the
 range of -32768 to 32767. Here is an example of a simple way to 'normalize'
-the audio (making it cover the whole amplitude rage but not exceeding it)::
+the audio (making it cover the whole amplitude range but not exceeding it)::
 
    audio_array *= 32767 / max(abs(audio_array))
 
